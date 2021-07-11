@@ -1,5 +1,6 @@
 // standard
 #include <iostream>
+#include <algorithm>
 // third party
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,6 +11,24 @@
 #include <graphics/gl/index_buffer.hpp>
 #include <graphics/gl/texture.hpp>
 #include <graphics/window.hpp>
+
+const int width = 100, height = 100, nrChannels = 3;
+const int data_size = width * height * nrChannels;
+std::uint8_t *data = new std::uint8_t[data_size];
+
+void on_mouse_move(GLFWwindow *window, double xpos, double ypos) {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        double x = (xpos / 512);
+        double y = ((512 - ypos) / 512);
+
+        int xcord = static_cast<int>(x * width);
+        int ycord = static_cast<int>(y * height);
+        xcord = std::clamp(xcord, 0, width);
+        ycord = std::clamp(ycord, 0, height);
+        int idx = (ycord * width + xcord) * 3;
+        std::fill_n(&data[idx + 1], 2, 255);
+    }
+}
 
 int main() {
     if (!glfwInit()) {
@@ -28,11 +47,11 @@ int main() {
     program.bind();
     program.set_uniform4f("color", 1, 0, 0, 1);
 
-    float vertices[] = {
-            0.5f, 0.5f, 0.0f, // top right
-            0.5f, -0.5f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f, // bottom left
-            -0.5f, 0.5f, 0.0f // top left
+    std::vector vertices{
+            +1.0f, +1.0f, 0.0f, +1.0f, +1.0f, // top right
+            +1.0f, -1.0f, 0.0f, +1.0f, +0.0f, // bottom right
+            -1.0f, -1.0f, 0.0f, +0.0f, +0.0f, // bottom left
+            -1.0f, +1.0f, 0.0f, +0.0f, +1.0f, // top left
     };
 
     unsigned int indices[] = {
@@ -40,8 +59,9 @@ int main() {
             1, 2, 3  // second triangle
     };
 
-    vertex_buffer vertexBuffer(sizeof(float) * 12, vertices);
-    vertex_buffer_layout bufferLayout({3, GL_FLOAT, GL_FALSE});
+    vertex_buffer vertexBuffer(sizeof(float) * 20, vertices.data());
+    vertex_buffer_layout bufferLayout({{3, GL_FLOAT, GL_FALSE},
+                                       {2, GL_FLOAT, GL_FALSE}});
     vertex_array vertexArray;
 
     vertexArray.add_buffer(vertexBuffer, bufferLayout);
@@ -49,13 +69,11 @@ int main() {
     index_buffer indexBuffer(6, indices);
     indexBuffer.bind();
 
-    const int width=100, height=100, nrChannels=3;
-    char *data = new char[width*height*nrChannels];
-    std::fill_n(data, width*height*nrChannels, 125);
+    std::fill_n(data, width * height * nrChannels, 0);
     texture text(width, height, data);
     text.bind();
-    int color = 0;
 
+    glfwSetCursorPosCallback(window, on_mouse_move);
     while (!glfwWindowShouldClose(window)) {
 
         // render
@@ -64,10 +82,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // render container
-        text.bind();
         text.update(data);
-        color = (++color)%255;
-        std::fill_n(data, width*height*nrChannels, color);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
