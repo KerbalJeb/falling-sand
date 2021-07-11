@@ -7,8 +7,9 @@
 #include <graphics/gl/shader.hpp>
 #include <graphics/gl/vertex_buffer.hpp>
 #include <graphics/gl/vertex_array.hpp>
+#include <graphics/gl/index_buffer.hpp>
 #include <graphics/window.hpp>
-#include <graphics/gl/vertex_array.hpp>
+
 GLuint vao = 0;
 GLuint EBO = 0;
 
@@ -31,24 +32,28 @@ int main() {
     program.set_uniform4f("color", 1, 0, 0, 1);
 
     float vertices[] = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.5f, 0.0f
+            0.5f, 0.5f, 0.0f, // top right
+            0.5f, -0.5f, 0.0f, // bottom right
+            -0.5f, -0.5f, 0.0f, // bottom left
+            -0.5f, 0.5f, 0.0f // top left
     };
 
-    vertex_buffer vertexBuffer(vertices, sizeof(float)*9);
+    unsigned int indices[] = {
+            0, 1, 3, // first triangle
+            1, 2, 3  // second triangle
+    };
+
+    vertex_buffer vertexBuffer(sizeof(float) * 12, vertices);
     vertex_buffer_layout bufferLayout({3, GL_FLOAT, GL_FALSE});
     vertex_array vertexArray;
 
     vertexArray.add_buffer(vertexBuffer, bufferLayout);
 
+    index_buffer indexBuffer(6, indices);
+    indexBuffer.bind();
 
 
-
-
-
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
 
         // render
         // ------
@@ -57,8 +62,7 @@ int main() {
 
         // render container
         program.bind();
-        vertexArray.bind();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

@@ -9,22 +9,42 @@
 
 class index_buffer {
 public:
-    index_buffer();
+    index_buffer(int count, const void *data, GLenum method = GL_STATIC_DRAW) {
+        glGenBuffers(1, &obj_);
+        bind();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(GLuint), data, method);
+    }
 
     index_buffer(const index_buffer &) = delete;
 
     index_buffer &operator=(const index_buffer &) = delete;
 
-    index_buffer(index_buffer &&other);
+    index_buffer(index_buffer &&other): obj_(other.obj_){
+        other.obj_ = 0;
+    }
 
-    index_buffer &operator=(index_buffer &&other);
+    index_buffer &operator=(index_buffer &&other){
+        release();
+        std::swap(obj_, other.obj_);
+    }
 
-    void bind();
+    ~index_buffer() { release(); }
+
+    void bind() const{
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, obj_);
+    }
+
+    void unbind() const{
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
 
 private:
-    void release();
-
     GLuint obj_{0};
+
+    void release() {
+        glDeleteBuffers(GL_ELEMENT_ARRAY_BUFFER, &obj_);
+        obj_ = 0;
+    }
 };
 
 #endif //CPP_FALLING_SAND_INDEX_BUFFER_HPP
