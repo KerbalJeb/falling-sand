@@ -6,6 +6,7 @@
 #define CPP_FALLING_SAND_TEXTURE_HPP
 
 #include <cstddef>
+#include <iostream>
 #include <GL/glew.h>
 
 class texture {
@@ -44,8 +45,9 @@ public:
 
     ~texture() { release(); }
 
-    void update(char *new_data) {
-        glTexSubImage2D(obj_, 0, 0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, new_data);
+    void update(const void *new_data) {
+        bind();
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, new_data);
     }
 
     void bind() {

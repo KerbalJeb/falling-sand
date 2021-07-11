@@ -11,10 +11,6 @@
 #include <graphics/gl/texture.hpp>
 #include <graphics/window.hpp>
 
-GLuint vao = 0;
-GLuint EBO = 0;
-
-
 int main() {
     if (!glfwInit()) {
         std::exit(EXIT_FAILURE);
@@ -58,6 +54,7 @@ int main() {
     std::fill_n(data, width*height*nrChannels, 125);
     texture text(width, height, data);
     text.bind();
+    int color = 0;
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -67,7 +64,10 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // render container
-        program.bind();
+        text.bind();
+        text.update(data);
+        color = (++color)%255;
+        std::fill_n(data, width*height*nrChannels, color);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
