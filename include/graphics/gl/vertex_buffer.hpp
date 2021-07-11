@@ -13,7 +13,7 @@
 
 class vertex_buffer {
 public:
-    explicit vertex_buffer(const void* data, int size, GLenum usage=GL_STATIC_DRAW) {
+    explicit vertex_buffer(int size, const void* data, GLenum usage=GL_STATIC_DRAW) {
         glGenBuffers(1, &obj_);
         assert(obj_ != 0);
         bind();
