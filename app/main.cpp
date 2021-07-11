@@ -8,6 +8,7 @@
 #include <graphics/gl/vertex_buffer.hpp>
 #include <graphics/gl/vertex_array.hpp>
 #include <graphics/gl/index_buffer.hpp>
+#include <graphics/gl/texture.hpp>
 #include <graphics/window.hpp>
 
 GLuint vao = 0;
@@ -27,7 +28,7 @@ int main() {
         std::exit(EXIT_FAILURE);
     }
 
-    shader_program program{"shaders/basic.vert", "shaders/basic.frag"};
+    shader_program program{"shaders/tex.vert", "shaders/tex.frag"};
     program.bind();
     program.set_uniform4f("color", 1, 0, 0, 1);
 
@@ -52,6 +53,11 @@ int main() {
     index_buffer indexBuffer(6, indices);
     indexBuffer.bind();
 
+    const int width=100, height=100, nrChannels=3;
+    char *data = new char[width*height*nrChannels];
+    std::fill_n(data, width*height*nrChannels, 125);
+    texture text(width, height, data);
+    text.bind();
 
     while (!glfwWindowShouldClose(window)) {
 
