@@ -34,7 +34,7 @@ public:
     }
     vertex_buffer_layout(std::initializer_list<vertex_attribute> attributes): layout_(attributes){
         stride_ = std::accumulate(layout_.begin(), layout_.end(), 0, [](int a, const vertex_attribute &b) {
-            return a + vertex_attribute::size_mapping[b.type];
+            return a + vertex_attribute::size_mapping[b.type]*b.count;
         });
     }
 
