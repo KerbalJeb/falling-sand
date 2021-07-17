@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.1glm9)
 project(cpp_falling_sand)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -10,7 +10,7 @@ find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
 add_executable(cpp_falling_sand app/main.cpp)
-target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm)
+target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm::glm)
 target_include_directories(cpp_falling_sand PRIVATE include)
 
 add_custom_command(TARGET cpp_falling_sand POST_BUILD

@@ -26,6 +26,7 @@ public:
     index_buffer &operator=(index_buffer &&other){
         release();
         std::swap(obj_, other.obj_);
+        return *this;
     }
 
     ~index_buffer() { release(); }
