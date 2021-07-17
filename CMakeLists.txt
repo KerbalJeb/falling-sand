@@ -7,9 +7,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(glm REQUIRED)
 
 add_executable(cpp_falling_sand app/main.cpp)
-target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW)
+target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm)
 target_include_directories(cpp_falling_sand PRIVATE include)
 
 add_custom_command(TARGET cpp_falling_sand POST_BUILD
