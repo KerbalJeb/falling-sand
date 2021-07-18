@@ -60,6 +60,10 @@ public:
 
   GLFWwindow *get_native() { return window_; }
 
+  [[nodiscard]] std::size_t width() const { return width_; }
+
+  [[nodiscard]] std::size_t height() const { return height_; }
+
 private:
   struct window_data {
     event_handler_func event_handler;
