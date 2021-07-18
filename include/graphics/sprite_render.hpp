@@ -5,6 +5,7 @@
 #ifndef CPP_FALLING_SAND_SPRITE_RENDER_HPP
 #define CPP_FALLING_SAND_SPRITE_RENDER_HPP
 
+#include <utility>
 #include <vector>
 #include <memory>
 
@@ -17,9 +18,12 @@
 
 class sprite_render {
 public:
-  explicit sprite_render(shader_program *shader, float width, float height)
-      : shader_(shader),
+  explicit sprite_render(std::shared_ptr<shader_program> shader, float width,
+                         float height)
+      : shader_(std::move(shader)),
         projection_(glm::ortho(0.0f, width, height, 0.0f, -1.0f, 1.0f)) {}
+
+  ~sprite_render() = default;
 
   void draw(const std::vector<sprite> &sprites) {
     shader_->bind();
@@ -34,6 +38,19 @@ public:
       array_.bind();
       glDrawArrays(GL_TRIANGLES, 0, 6);
     }
+  }
+
+  void draw(const sprite &s) {
+    shader_->bind();
+    shader_->set_uniform_mat4("projection", projection_);
+    glm::mat4 model{1.0f};
+    model = glm::translate(model, glm::vec3(s.pos, 0.0f));
+    model = glm::scale(model, glm::vec3(s.scale, 1.0f));
+
+    shader_->set_uniform_mat4("model", model);
+    shader_->set_uniform3f("spriteColor", s.color);
+    array_.bind();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
 private:

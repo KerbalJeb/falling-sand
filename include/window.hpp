@@ -12,6 +12,7 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <cassert>
 
 class window {
 public:
@@ -45,6 +46,8 @@ public:
     });
 
   }
+
+  ~window() { shut_down(); }
 
   void shut_down() { glfwDestroyWindow(window_); }
 

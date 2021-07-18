@@ -11,7 +11,7 @@ class layer {
 public:
   layer() = default;
 
-  virtual ~layer();
+  virtual ~layer() = default;
 
   virtual void on_update() = 0;
 
