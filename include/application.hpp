@@ -51,6 +51,10 @@ public:
 
   void push_layer(layer *l) { layers_.push_back(l); }
 
+  [[nodiscard]] int window_width() const { return window_.width(); }
+
+  [[nodiscard]] int window_height() const { return window_.height(); }
+
   window *get_window() { return &(window_); }
 
   static application *instance() { return instance_; }

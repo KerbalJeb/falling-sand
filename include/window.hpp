@@ -5,6 +5,7 @@
 #define CPP_FALLING_SAND_WINDOW_HPP
 
 #include <events/application_event.hpp>
+#include <events/mouse_events.hpp>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -44,6 +45,17 @@ public:
       window_close_event e;
       data->event_handler(e);
     });
+
+    glfwSetMouseButtonCallback(window_,
+                               [](GLFWwindow *window, int button, int action,
+                                  int mods) {
+                                 auto data = static_cast<window_data *>(glfwGetWindowUserPointer(
+                                     window));
+                                 if (action == GLFW_PRESS) {
+                                   mouse_press_event e{button, mods};
+                                   data->event_handler(e);
+                                 }
+                               });
 
   }
 

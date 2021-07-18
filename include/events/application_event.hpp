@@ -11,7 +11,7 @@ class window_close_event : public event {
 public:
   window_close_event() = default;
 
-  virtual event_type
+  [[nodiscard]] event_type
   get_event_type() const override { return get_static_type(); }
 
   static event_type get_static_type() { return event_type::WindowClose; }

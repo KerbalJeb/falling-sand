@@ -16,7 +16,7 @@ public:
     const int bufferSize = width * height * 3;
     try {
       dataBuffer_ = new std::uint8_t[bufferSize];
-      std::fill_n(dataBuffer_, bufferSize, 0);
+      std::fill_n(dataBuffer_, bufferSize, 255);
 
       shader_ = std::make_shared<shader_program>("shaders/sprite2d.vert",
                                                  "shaders/sprite2d.frag");
@@ -49,10 +49,12 @@ public:
       xcord = std::clamp(xcord, 0, width_ - 1);
       ycord = std::clamp(ycord, 0, height_ - 1);
       int idx = (ycord * width_ + xcord) * 3;
-      std::fill_n(&dataBuffer_[idx + 1], 2, 255);
+      dataBuffer_[idx + 0] = 0;
+      dataBuffer_[idx + 1] = 255;
+      dataBuffer_[idx + 2] = 0;
       texture_->update(dataBuffer_);
-      render_->draw(background);
     }
+    render_->draw(background);
   }
 
   void on_event(event &e) override {

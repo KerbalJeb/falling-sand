@@ -11,17 +11,18 @@
 
 class texture2d {
 public:
-  texture2d(std::size_t width, std::size_t height, const void *pixel_data)
+  texture2d(std::size_t width, std::size_t height, const void *pixel_data,
+            GLenum format = GL_RGB, GLint minMagFilter = GL_NEAREST)
       : width_(width), height_(height) {
     glGenTextures(1, &obj_);
     bind();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minMagFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, minMagFilter);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format,
                  GL_UNSIGNED_BYTE, pixel_data);
   }
 

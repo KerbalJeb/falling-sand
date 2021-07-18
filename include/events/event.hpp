@@ -1,6 +1,3 @@
-//
-// Created by ben on 2021-07-17.
-//
 
 #ifndef CPP_FALLING_SAND_EVENT_HPP
 #define CPP_FALLING_SAND_EVENT_HPP
@@ -25,7 +22,7 @@ template<class T, class F>
 bool dispatch_event(event &e, const F &func) {
   if (e.get_event_type() == T::get_static_type()) {
     e.handled |= func(static_cast<T &>(e));
-    return true;
+    return e.handled;
   }
   return false;
 }

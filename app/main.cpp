@@ -5,7 +5,9 @@
 #include <GLFW/glfw3.h>
 // local
 #include <application.hpp>
+#include <graphics/image.hpp>
 #include "sand_layer.hpp"
+#include "ui_layer.hpp"
 
 const int width = 100, height = 100;
 
@@ -15,7 +17,9 @@ int main() {
   }
   auto app = application::init(512, 512, "My Demo", GL_FALSE);
   sand_layer sandLayer{width, height};
+  ui_layer uiLayer{};
   app->push_layer(&sandLayer);
+  app->push_layer(&uiLayer);
 
   app->run();
   application::deinit();

@@ -35,6 +35,7 @@ public:
 
       shader_->set_uniform_mat4("model", model);
       shader_->set_uniform3f("spriteColor", s.color);
+      s.texture->bind();
       array_.bind();
       glDrawArrays(GL_TRIANGLES, 0, 6);
     }
@@ -49,6 +50,7 @@ public:
 
     shader_->set_uniform_mat4("model", model);
     shader_->set_uniform3f("spriteColor", s.color);
+    s.texture->bind();
     array_.bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
