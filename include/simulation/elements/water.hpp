@@ -1,15 +1,14 @@
 //
-// Created by ben on 2021-07-18.
+// Created by ben on 2021-07-19.
 //
 
-#ifndef CPP_FALLING_SAND_SAND_HPP
-#define CPP_FALLING_SAND_SAND_HPP
+#ifndef CPP_FALLING_SAND_WATER_HPP
+#define CPP_FALLING_SAND_WATER_HPP
 
 #include <simulation/util.hpp>
 
 namespace elements {
-  class update_sand {
-  public:
+  struct update_water {
     void operator()(simulation_canvas &canvas, int x, int y) {
       auto &p = canvas.get_particle(x, y);
 
@@ -31,6 +30,22 @@ namespace elements {
             return;
           }
         }
+
+        if (canvas.in_canvas(x + 1, y)) {
+          auto &right = canvas.get_particle(x + 1, y);
+          if (right.id == element::empty_id()) {
+            std::swap(right, p);
+            return;
+          }
+        }
+
+        if (canvas.in_canvas(x - 1, y)) {
+          auto &left = canvas.get_particle(x - 1, y);
+          if (left.id == element::empty_id()) {
+            std::swap(left, p);
+            return;
+          }
+        }
         return;
       }
 
@@ -45,4 +60,5 @@ namespace elements {
     }
   };
 }
-#endif //CPP_FALLING_SAND_SAND_HPP
+
+#endif //CPP_FALLING_SAND_WATER_HPP

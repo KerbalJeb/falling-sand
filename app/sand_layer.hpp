@@ -14,8 +14,10 @@
 class sand_layer : public layer {
 public:
   sand_layer(int width, int height)
-      : width_(width), height_(height), textureImage(width, height, 3),
-        canvas(width, height) {
+      : width_(width), height_(height),
+        windowHeight_(application::window_height()),
+        windowWidth_(application::window_width()),
+        textureImage(width, height, 3), canvas(width, height) {
 
     shader_ = std::make_shared<shader_program>(
         "resources/shaders/sprite2d.vert",
@@ -32,14 +34,15 @@ public:
     if (input::get_mouse_button(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
       double xpos, ypos;
       input::get_cursor(&xpos, &ypos);
-      double x = (xpos / 512);
-      double y = (ypos / 512);
+      double x = (xpos / windowWidth_);
+      double y = (ypos / windowHeight_);
 
       int xcord = static_cast<int>(x * width_);
       int ycord = static_cast<int>(y * height_);
 
       xcord = std::clamp(xcord, 0, width_ - 1);
       ycord = std::clamp(ycord, 0, height_ - 1);
+
       canvas.add_particle(xcord, ycord, 1);
     }
     canvas.step_forward();
@@ -54,6 +57,7 @@ public:
 
 private:
   int width_, height_;
+  int windowWidth_, windowHeight_;
   image textureImage;
   simulation_canvas canvas;
   std::unique_ptr<texture2d> texture_;

@@ -23,10 +23,21 @@ public:
 
   void add_particle(int x, int y, element_id_type id) {
     assert(in_canvas(x, y));
-    auto &e = get_particle(x, y);
-    if (id != 0 && e.id == 0) {
-      assert(id < elements_.size());
-      e = elements_[id].create();
+    assert(id < elements_.size());
+
+    auto xMin = std::clamp(x - 5, 0, width_ - 1);
+    auto xMax = std::clamp(x + 5, 0, width_ - 1);
+
+    auto yMin = std::clamp(y - 5, 0, height_ - 1);
+    auto yMax = std::clamp(y + 5, 0, height_ - 1);
+
+    for (int i = xMin; i < xMax; ++i) {
+      for (int j = yMin; j < yMax; ++j) {
+        auto &e = get_particle(i, j);
+        if (id != 0 && e.id == 0) {
+          e = elements_[id].create();
+        }
+      }
     }
   }
 

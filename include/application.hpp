@@ -60,9 +60,11 @@ public:
 
   void push_layer(layer *l) { layers_.push_back(l); }
 
-  [[nodiscard]] int window_width() const { return window_.width(); }
+  [[nodiscard]] static int window_width() { return instance_->window_.width(); }
 
-  [[nodiscard]] int window_height() const { return window_.height(); }
+  [[nodiscard]] static int
+  window_height() { return instance_->window_.height(); }
+
 
   window *get_window() { return &(window_); }
 

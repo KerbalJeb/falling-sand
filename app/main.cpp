@@ -8,13 +8,13 @@
 #include "sand_layer.hpp"
 #include "ui_layer.hpp"
 
-const int width = 100, height = 100;
+const int width = 640, height = 320;
 
 int main() {
   if (!glfwInit()) {
     std::exit(EXIT_FAILURE);
   }
-  auto app = application::init(512, 512, "My Demo", GL_FALSE,
+  auto app = application::init(width * 2, height * 2, "My Demo", GL_FALSE,
                                "resources/icon.png");
   sand_layer sandLayer{width, height};
   ui_layer uiLayer{};

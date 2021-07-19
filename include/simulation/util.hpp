@@ -30,23 +30,18 @@ find_in_line(simulation_canvas &canvas, int x0, int x1, int y0, int y1,
 
 class random_color {
 public:
-  random_color(std::uint8_t redMin, std::uint8_t redMax, std::uint8_t greenMin,
-               std::uint8_t greenMax, std::uint8_t blueMin,
-               std::uint8_t blueMax)
-      : red_(redMin, redMax), green_(greenMin, greenMax),
-        blue_(blueMin, blueMax) {}
+  random_color(float minScale, float maxScale) : dist_(minScale, maxScale) {}
 
-  std::uint8_t red() { return red_(rd); }
-
-  std::uint8_t green() { return green_(rd); }
-
-  std::uint8_t blue() { return blue_(rd); }
+  void set_color(std::uint8_t &r, std::uint8_t &g, std::uint8_t &b) {
+    float scale = dist_(rd);
+    r = static_cast<std::uint8_t>(std::clamp(scale * r, 0.0f, 255.0f));
+    g = static_cast<std::uint8_t>(std::clamp(scale * g, 0.0f, 255.0f));
+    b = static_cast<std::uint8_t>(std::clamp(scale * b, 0.0f, 255.0f));
+  }
 
 private:
   static inline std::random_device rd{};
-  std::uniform_int_distribution<std::uint8_t> red_;
-  std::uniform_int_distribution<std::uint8_t> green_;
-  std::uniform_int_distribution<std::uint8_t> blue_;
+  std::uniform_real_distribution<float> dist_;
 };
 
 #endif //CPP_FALLING_SAND_UTIL_HPP
