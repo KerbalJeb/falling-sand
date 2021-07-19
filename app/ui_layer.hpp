@@ -26,8 +26,8 @@ public:
   }
 
   ui_layer() : ui_layer(
-      std::make_shared<shader_program>("shaders/sprite2d.vert",
-                                       "shaders/sprite2d.frag")) {}
+      std::make_shared<shader_program>("resources/shaders/sprite2d.vert",
+                                       "resources/shaders/sprite2d.frag")) {}
 
   void on_update() override {
     for (const auto &b:buttons) {

@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 // local
 #include <application.hpp>
-#include <graphics/image.hpp>
 #include "sand_layer.hpp"
 #include "ui_layer.hpp"
 

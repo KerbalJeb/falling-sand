@@ -11,14 +11,9 @@ find_package(glm REQUIRED)
 
 add_subdirectory(external)
 
-add_executable(cpp_falling_sand app/main.cpp)
+add_executable(cpp_falling_sand app/main.cpp lib/simulation/element.cpp)
 target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm::glm stb_image)
-target_include_directories(cpp_falling_sand PRIVATE include)
-
-add_custom_command(TARGET cpp_falling_sand POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
-        )
+target_include_directories(cpp_falling_sand PRIVATE include app)
 
 add_custom_command(TARGET cpp_falling_sand POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
