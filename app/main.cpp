@@ -14,7 +14,8 @@ int main() {
   if (!glfwInit()) {
     std::exit(EXIT_FAILURE);
   }
-  auto app = application::init(512, 512, "My Demo", GL_FALSE);
+  auto app = application::init(512, 512, "My Demo", GL_FALSE,
+                               "resources/icon.png");
   sand_layer sandLayer{width, height};
   ui_layer uiLayer{};
   app->push_layer(&sandLayer);

@@ -6,11 +6,13 @@
 
 #include <events/application_event.hpp>
 #include <events/mouse_events.hpp>
+#include <graphics/image.hpp>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <functional>
+#include <filesystem>
 #include <map>
 #include <vector>
 #include <cassert>
@@ -57,6 +59,15 @@ public:
                                  }
                                });
 
+  }
+
+  window(int width, int height, const std::string &title, GLboolean resizable,
+         const event_handler_func &handler,
+         const std::filesystem::path &iconPath)
+      : window(width, height, title, resizable, handler) {
+    image icon{iconPath};
+    GLFWimage iconImg = icon.get_glfw_image();
+    glfwSetWindowIcon(window_, 1, &iconImg);
   }
 
   ~window() { shut_down(); }

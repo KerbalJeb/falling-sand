@@ -10,6 +10,7 @@
 #include <map>
 #include <stb_image/stb_image.h>
 #include <graphics/gl/texture2d.hpp>
+#include <GLFW/glfw3.h>
 
 class image {
 public:
@@ -44,6 +45,10 @@ public:
   [[nodiscard]] int channels() const { return channels_; }
 
   [[nodiscard]] int size() const { return width_ * height_ * channels_; }
+
+  GLFWimage get_glfw_image() {
+    return GLFWimage{width_, height_, img_};
+  }
 
   texture2d create_texture() {
     return texture2d(width_, height_, img_, formatMapping.at(channels_),

@@ -23,6 +23,15 @@ public:
     return instance_;
   }
 
+  static application *
+  init(int width, int height, const std::string &title, GLboolean resizable,
+       const std::filesystem::path &path) {
+    if (instance_ == nullptr) {
+      instance_ = new application(width, height, title, resizable, path);
+    }
+    return instance_;
+  }
+
   static void deinit() {
     delete instance_;
   }
@@ -67,6 +76,13 @@ private:
                 [this](auto &&e) {
                   on_event(std::forward<decltype(e)>(e));
                 }) {}
+
+  application(int width, int height, const std::string &title,
+              GLboolean resizable, const std::filesystem::path &path)
+      : window_(width, height, title, resizable,
+                [this](auto &&e) {
+                  on_event(std::forward<decltype(e)>(e));
+                }, path) {}
 
   static inline application *instance_{nullptr};
   window window_;
