@@ -1,4 +1,4 @@
-//
+///tmp/cpp-project-build
 // Created by ben on 2021-07-18.
 //
 
@@ -69,7 +69,7 @@ public:
 
   [[nodiscard]] particle_instance &get_particle(int x, int y) {
     assert(in_canvas(x, y));
-    return buffer.at(y * width_ + x);
+    return buffer[y * width_ + x];
   }
 
   [[nodiscard]] const particle_instance &get_particle(int x, int y) const {
@@ -79,6 +79,10 @@ public:
 
   [[nodiscard]] bool in_canvas(int x, int y) const {
     return x < width_ && y < height_ && y >= 0 && x >= 0;
+  }
+
+  [[nodiscard]] bool on_floor(int y) const {
+    return y == height_ - 1;
   }
 
 private:
