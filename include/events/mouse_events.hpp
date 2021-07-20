@@ -26,4 +26,23 @@ private:
   int button_, mods_;
 };
 
+class mouse_moves_event : public event {
+public:
+  explicit mouse_moves_event(int x, int y) : x_(x),
+                                             y_(y) {}
+
+
+  [[nodiscard]] int get_x() const { return x_; }
+
+  [[nodiscard]] int get_y() const { return y_; }
+
+  [[nodiscard]] event_type
+  get_event_type() const override { return get_static_type(); }
+
+  static event_type get_static_type() { return event_type::MouseMoved; }
+
+private:
+  int x_, y_;
+};
+
 #endif //CPP_FALLING_SAND_MOUSE_EVENTS_HPP

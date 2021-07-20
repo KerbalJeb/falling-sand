@@ -6,6 +6,7 @@
 
 #include <events/application_event.hpp>
 #include <events/mouse_events.hpp>
+#include <events/key_events.hpp>
 #include <graphics/image.hpp>
 
 #include <GL/glew.h>
@@ -26,6 +27,7 @@ public:
       : title_(title),
         width_(width),
         height_(height) {
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -48,17 +50,27 @@ public:
       data->event_handler(e);
     });
 
-    glfwSetMouseButtonCallback(window_,
-                               [](GLFWwindow *window, int button, int action,
-                                  int mods) {
-                                 auto data = static_cast<window_data *>(glfwGetWindowUserPointer(
-                                     window));
-                                 if (action == GLFW_PRESS) {
-                                   mouse_press_event e{button, mods};
-                                   data->event_handler(e);
-                                 }
-                               });
+    glfwSetMouseButtonCallback(window_, [](auto w, int b, int a, int m) {
+      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
+      if (a == GLFW_PRESS) {
+        mouse_press_event e{b, m};
+        data->event_handler(e);
+      }
+    });
 
+    glfwSetKeyCallback(window_, [](auto w, int b, int, int a, int mods) {
+      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
+      if (a == GLFW_PRESS) {
+        key_down_event e{b, mods};
+        data->event_handler(e);
+      }
+    });
+
+    glfwSetCursorPosCallback(window_, [](auto w, double x, double y) {
+      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
+      mouse_moves_event e{static_cast<int>(x), static_cast<int>(y)};
+      data->event_handler(e);
+    });
   }
 
   window(int width, int height, const std::string &title, GLboolean resizable,

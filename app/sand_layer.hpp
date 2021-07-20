@@ -16,9 +16,7 @@ class sand_layer : public layer {
 public:
   sand_layer(int width, int height, int scale,
              std::shared_ptr<sprite_render> render)
-      : width_(width), height_(height),
-        windowHeight_(application::window_height()),
-        windowWidth_(application::window_width()),
+      : width_(width), height_(height), scale_(scale),
         textureImage(width, height, 3), canvas(width, height),
         render_(std::move(render)) {
     texture_ = std::make_unique<texture2d>(width, height,
@@ -38,18 +36,9 @@ public:
 
   void on_update() override {
     if (input::get_mouse_button(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-      double xpos, ypos;
-      input::get_cursor(&xpos, &ypos);
-      double x = (xpos / windowWidth_);
-      double y = (ypos / windowHeight_);
-
-      int xcord = static_cast<int>(x * width_);
-      int ycord = static_cast<int>(y * height_);
-
-      xcord = std::clamp(xcord, 0, width_ - 1);
-      ycord = std::clamp(ycord, 0, height_ - 1);
-
-      canvas.add_particle(xcord, ycord, activeId_);
+      double x, y;
+      input::get_cursor(&x, &y);
+      on_mouse_event(x, y);
     }
     if (simActive_) {
       canvas.step_forward();
@@ -60,12 +49,29 @@ public:
   }
 
   void on_event(event &e) override {
+    dispatch_event<key_down_event>(e, [this](auto &e) {
+      return on_key(std::forward<decltype(e)>(e));
+    });
 
+    dispatch_event<mouse_press_event>(e, [this](auto &e) {
+      if (e.button_id() == GLFW_MOUSE_BUTTON_LEFT) {
+        double x, y;
+        input::get_cursor(&x, &y);
+        return on_mouse_event(x, y);
+      }
+      return false;
+    });
+
+    dispatch_event<mouse_moves_event>(e, [this](auto &e) {
+      if (input::get_mouse_button(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        return on_mouse_event(e.get_x(), e.get_y());
+      }
+      return false;
+    });
   }
 
 private:
-  int width_, height_;
-  int windowWidth_, windowHeight_;
+  int width_, height_, scale_;
   image textureImage;
   simulation_canvas canvas;
   std::unique_ptr<texture2d> texture_;
@@ -73,6 +79,25 @@ private:
   std::shared_ptr<sprite_render> render_;
   element_id_type activeId_{1};
   bool simActive_{true};
+
+  bool on_mouse_event(int x, int y) {
+    int xcord = x / scale_;
+    int ycord = y / scale_;
+
+    if (canvas.in_canvas(xcord, ycord)) {
+      canvas.add_particle(xcord, ycord, activeId_);
+      return true;
+    }
+    return false;
+  }
+
+  bool on_key(key_down_event &e) {
+    if (e.button_id() == GLFW_KEY_SPACE) {
+      toggle_simulation();
+      return true;
+    }
+    return false;
+  }
 };
 
 #endif //CPP_FALLING_SAND_SANDBOX_HPP
