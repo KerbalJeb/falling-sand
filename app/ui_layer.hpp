@@ -13,30 +13,20 @@
 
 class ui_layer : public layer {
 public:
-  explicit ui_layer(std::shared_ptr<sprite_render> render)
-      : render_(std::move(render)) {
-    image img{"resources/img.png"};
-    auto windowWidth = application::instance()->window_width();
-    auto windowHeight = application::instance()->window_height();
-
-    buttons.emplace_back("resources/img.png", 0, 0, 25, 75,
-                         []() { std::cout << "Button Pressed" << std::endl; });
-  }
+  explicit ui_layer(std::shared_ptr<sprite_render> render,
+                    std::vector<ui_button> buttons)
+      : render_(std::move(render)), buttons_(std::move(buttons)) {}
 
   void on_update() override {
-    for (const auto &b:buttons) {
-      render_->draw(b.get_sprite());
-    }
+    for (const auto &b:buttons_) { render_->draw(b.get_sprite()); }
   }
 
   void on_event(event &e) override {
-    for (auto &b:buttons) {
-      b.on_event(e);
-    }
+    for (auto &b:buttons_) { b.on_event(e); }
   }
 
 private:
-  std::vector<ui_button> buttons;
+  std::vector<ui_button> buttons_;
   std::shared_ptr<sprite_render> render_;
 };
 

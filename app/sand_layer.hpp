@@ -114,10 +114,12 @@ private:
         canvas.clear();
         break;
       case GLFW_KEY_LEFT_BRACKET:
-        change_brush_size(activeBrush_->size() - 1);
+        change_brush_size(activeBrush_->size() -
+                          std::clamp(activeBrush_->size() / 5, 1, 20));
         break;
       case GLFW_KEY_RIGHT_BRACKET:
-        change_brush_size(activeBrush_->size() + 1);
+        change_brush_size(activeBrush_->size() +
+                          std::clamp(activeBrush_->size() / 5, 1, 20));
         break;
       default:
         return false;
