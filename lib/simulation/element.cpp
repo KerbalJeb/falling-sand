@@ -1,31 +1,37 @@
 #include <simulation/element.hpp>
-#include <simulation/elements/elements.hpp>
+#include <simulation/element_update.hpp>
+#include <simulation/rn_generator.hpp>
 #include <utility>
 
-std::vector<element> &element::get_element_classes() {
-  if (allElements_.empty()) {
-    idx_ = 0;
-    allElements_ = std::vector<element>{
-        {creation_func{0, 0, 0},             nullptr,                  "empty"},
-        {creation_func{194, 178, 128, 0.2f}, elements::update_sand{},  "sand"},
-        {creation_func{50, 50, 200, 0.2f},   elements::update_water{}, "water"},
-    };
-    for (int i = 0; i < allElements_.size(); ++i) {
-      allElements_[i].create.set_id(i);
-    }
-  }
-  return allElements_;
+
+particle_instance element::create() const {
+  auto p = particle_instance{type, 0, 0, 0, red_, green_, blue_};
+  if (randomizeColor) { randomize(p); }
+  return p;
 }
 
-element::element(creation_func create,
-                 element::update_function update, std::string name_)
-    : create(create), update(std::move(update)),
-      type(idx_), name(std::move(name_)) { ++idx_; }
+void element::randomize(particle_instance &p) const {
+  auto scale = 1 - colorVar_ * rng::instance().rand_float();
+  p.r = static_cast<std::uint8_t>(scale * p.r);
+  p.g = static_cast<std::uint8_t>(scale * p.g);
+  p.b = static_cast<std::uint8_t>(scale * p.b);
+}
 
-int element::get_idx_of(const std::string &name) {
-  auto &ec = get_element_classes();
-  auto it = std::find_if(ec.begin(), ec.end(),
-                         [name](const auto &e) { return e.name == name; });
-  assert(it != ec.end());
-  return it - ec.begin();
+element::element(uint8_t red, uint8_t green, uint8_t blue,
+                 element::update_function update, std::string name_)
+    : update(std::move(update)),
+      red_{red}, green_{green}, blue_{blue},
+      name(std::move(name_)),
+      randomizeColor{false} {
+
+}
+
+element::element(uint8_t red, uint8_t green, uint8_t blue, float colorVariation,
+                 element::update_function update, std::string name_)
+    : update(std::move(update)),
+      name(std::move(name_)),
+      red_{red}, green_{green}, blue_{blue},
+      randomizeColor{true},
+      colorVar_{colorVariation} {
+
 }

@@ -11,7 +11,14 @@ find_package(glm REQUIRED)
 
 add_subdirectory(external)
 
-add_executable(cpp_falling_sand app/main.cpp lib/simulation/element.cpp)
+add_executable(cpp_falling_sand app/main.cpp
+        lib/simulation/brushes.cpp
+        lib/simulation/element.cpp
+        lib/simulation/element_manager.cpp
+        lib/simulation/element_update.cpp
+        lib/simulation/rn_generator.cpp
+        lib/simulation/simulation_canvas.cpp)
+
 target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm::glm stb_image)
 target_include_directories(cpp_falling_sand PRIVATE include app)
 

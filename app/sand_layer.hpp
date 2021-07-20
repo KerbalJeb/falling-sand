@@ -9,6 +9,7 @@
 #include <input/input.hpp>
 #include <graphics/sprite_render.hpp>
 #include <simulation/simulation_canvas.hpp>
+#include <simulation/brushes.hpp>
 #include <utility>
 
 
@@ -25,7 +26,7 @@ public:
     background.scale = glm::vec2(width * scale, height * scale);
     background.pos = glm::vec2(0);
     activeBrush_ =
-        std::make_unique<simulation_canvas::rectangle_brush>(5, false);
+        std::make_unique<rectangle_brush>(5, false);
     change_brush_size(5);
   }
 
@@ -82,7 +83,7 @@ private:
   std::unique_ptr<texture2d> texture_;
   sprite background;
   std::shared_ptr<sprite_render> render_;
-  std::unique_ptr<simulation_canvas::rectangle_brush> activeBrush_;
+  std::unique_ptr<rectangle_brush> activeBrush_;
   element_id_type activeId_{1};
   bool simActive_{true};
 
@@ -98,7 +99,7 @@ private:
       }
       if (input::get_mouse_button(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         activeBrush_->set_overwrite(true);
-        canvas.add_particle(xcord, ycord, element::empty_id(), *activeBrush_);
+        canvas.add_particle(xcord, ycord, 0, *activeBrush_);
         return true;
       }
     }
