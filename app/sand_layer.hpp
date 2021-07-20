@@ -112,6 +112,13 @@ private:
         break;
       case GLFW_KEY_DELETE:
         canvas.clear();
+        break;
+      case GLFW_KEY_LEFT_BRACKET:
+        change_brush_size(activeBrush_->size() - 1);
+        break;
+      case GLFW_KEY_RIGHT_BRACKET:
+        change_brush_size(activeBrush_->size() + 1);
+        break;
       default:
         return false;
     }

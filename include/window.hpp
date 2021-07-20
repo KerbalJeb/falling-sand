@@ -97,10 +97,10 @@ public:
   void set_cursor(GLFWimage *img) {
     auto newCursor = glfwCreateCursor(img, img->width / 2, img->height / 2);
     glfwSetCursor(window_, newCursor);
-    if (activeCursor_ != nullptr) {
-      glfwDestroyCursor(activeCursor_);
+    if (customCursor_ != nullptr) {
+      glfwDestroyCursor(customCursor_);
     }
-    activeCursor_ = newCursor;
+    customCursor_ = newCursor;
   }
 
   GLFWwindow *get_native() { return window_; }
@@ -117,7 +117,7 @@ private:
   std::string title_;
   std::size_t width_, height_;
   window_data data_;
-  GLFWcursor *activeCursor_{nullptr};
+  GLFWcursor *customCursor_{nullptr};
 };
 
 

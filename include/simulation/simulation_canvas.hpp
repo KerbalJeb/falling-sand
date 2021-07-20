@@ -19,20 +19,23 @@ public:
   using brush = std::function<void(simulation_canvas &, int, int, int)>;
 
   struct brush_base {
-    brush_base(int radius, bool overwrite)
-        : size_(radius), overwrite_(overwrite) {}
+    brush_base(int radius, bool overwrite, int maxSize = 40, int minSize = 1)
+        : size_(radius),
+          overwrite_(overwrite),
+          maxSize_(maxSize),
+          minSize_(minSize) {}
 
     virtual void operator()(simulation_canvas &canvas, int x, int y,
                             element_id_type id) const = 0;
 
-    void set_size(int s) { size_ = s; }
+    void set_size(int s) { size_ = std::clamp(s, minSize_, maxSize_); }
 
     void set_overwrite(bool o) { overwrite_ = o; }
 
     [[nodiscard]] int size() const { return size_; }
 
   protected:
-    int size_;
+    int size_, maxSize_, minSize_;
     bool overwrite_;
   };
 
@@ -44,13 +47,13 @@ public:
       auto xMin = std::clamp(x - size_, 0, canvas.width_);
       auto xMax = std::clamp(x + size_, 0, canvas.width_);
 
-      auto yMin = std::clamp(y - size_, 0, canvas.height_ - 1);
-      auto yMax = std::clamp(y + size_, 0, canvas.height_ - 1);
+      auto yMin = std::clamp(y - size_, 0, canvas.height_);
+      auto yMax = std::clamp(y + size_, 0, canvas.height_);
 
       for (int i = xMin; i < xMax; ++i) {
         for (int j = yMin; j < yMax; ++j) {
           auto &e = canvas.get_particle(i, j);
-          if (overwrite_ || e.id == 0) {
+          if (overwrite_ || e.id == 0 && e.id != id) {
             e = canvas.elements_[id].create();
           }
         }

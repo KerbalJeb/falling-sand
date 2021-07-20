@@ -6,7 +6,7 @@ std::vector<element> &element::get_element_classes() {
   if (allElements_.empty()) {
     idx_ = 0;
     allElements_ = std::vector<element>{
-        {creation_func{0, 0, 0, 0.0f},       nullptr,                  "empty"},
+        {creation_func{0, 0, 0},             nullptr,                  "empty"},
         {creation_func{194, 178, 128, 0.2f}, elements::update_sand{},  "sand"},
         {creation_func{50, 50, 200, 0.2f},   elements::update_water{}, "water"},
     };
