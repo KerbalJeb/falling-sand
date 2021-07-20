@@ -92,11 +92,16 @@ private:
   }
 
   bool on_key(key_down_event &e) {
-    if (e.button_id() == GLFW_KEY_SPACE) {
-      toggle_simulation();
-      return true;
+    switch (e.button_id()) {
+      case GLFW_KEY_SPACE:
+        toggle_simulation();
+        break;
+      case GLFW_KEY_DELETE:
+        canvas.clear();
+      default:
+        return false;
     }
-    return false;
+    return true;
   }
 };
 

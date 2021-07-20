@@ -47,6 +47,10 @@ public:
     e = elements_[0].create();
   }
 
+  void clear() {
+    std::fill(buffer.begin(), buffer.end(), particle_instance{});
+  }
+
   void step_forward() {
     evenFrame ^= 1;
     int xStart = evenFrame ? 0 : width_ - 1;
