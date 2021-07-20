@@ -15,19 +15,10 @@
 
 class application {
 public:
-  static application *
-  init(int width, int height, const std::string &title, GLboolean resizable) {
+  template<class... Args>
+  static application *init(Args &&... args) {
     if (instance_ == nullptr) {
-      instance_ = new application(width, height, title, resizable);
-    }
-    return instance_;
-  }
-
-  static application *
-  init(int width, int height, const std::string &title, GLboolean resizable,
-       const std::filesystem::path &path) {
-    if (instance_ == nullptr) {
-      instance_ = new application(width, height, title, resizable, path);
+      instance_ = new application(args...);
     }
     return instance_;
   }
@@ -72,19 +63,12 @@ public:
 
 
 private:
-  application(int width, int height, const std::string &title,
-              GLboolean resizable)
-      : window_(width, height, title, resizable,
+  template<class... Args>
+  explicit application(Args... args)
+      : window_(args...,
                 [this](auto &&e) {
                   on_event(std::forward<decltype(e)>(e));
                 }) {}
-
-  application(int width, int height, const std::string &title,
-              GLboolean resizable, const std::filesystem::path &path)
-      : window_(width, height, title, resizable,
-                [this](auto &&e) {
-                  on_event(std::forward<decltype(e)>(e));
-                }, path) {}
 
   static inline application *instance_{nullptr};
   window window_;

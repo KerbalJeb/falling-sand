@@ -62,13 +62,14 @@ public:
   }
 
   window(int width, int height, const std::string &title, GLboolean resizable,
-         const event_handler_func &handler,
-         const std::filesystem::path &iconPath)
+         const std::filesystem::path &iconPath,
+         const event_handler_func &handler)
       : window(width, height, title, resizable, handler) {
     image icon{iconPath};
     GLFWimage iconImg = icon.get_glfw_image();
     glfwSetWindowIcon(window_, 1, &iconImg);
   }
+
 
   ~window() { shut_down(); }
 
@@ -80,6 +81,15 @@ public:
   }
 
   void set_handler(const event_handler_func &f) { data_.event_handler = f; }
+
+  void set_cursor(GLFWimage *img) {
+    auto newCursor = glfwCreateCursor(img, img->width / 2, img->height / 2);
+    glfwSetCursor(window_, newCursor);
+    if (activeCursor_ != nullptr) {
+      glfwDestroyCursor(activeCursor_);
+    }
+    activeCursor_ = newCursor;
+  }
 
   GLFWwindow *get_native() { return window_; }
 
@@ -95,6 +105,7 @@ private:
   std::string title_;
   std::size_t width_, height_;
   window_data data_;
+  GLFWcursor *activeCursor_{nullptr};
 };
 
 
