@@ -24,6 +24,9 @@ public:
     background.texture = texture_.get();
     background.scale = glm::vec2(width * scale, height * scale);
     background.pos = glm::vec2(0);
+    activeBrush_ =
+        std::make_unique<simulation_canvas::rectangle_brush>(5, false);
+    change_brush_size(5);
   }
 
   void set_active_element(element_id_type id) {
@@ -35,11 +38,10 @@ public:
   }
 
   void on_update() override {
-    if (input::get_mouse_button(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-      double x, y;
-      input::get_cursor(&x, &y);
-      on_mouse_event(x, y);
-    }
+    double x, y;
+    input::get_cursor(&x, &y);
+    on_mouse_event(x, y);
+
     if (simActive_) {
       canvas.step_forward();
     }
@@ -54,20 +56,23 @@ public:
     });
 
     dispatch_event<mouse_press_event>(e, [this](auto &e) {
-      if (e.button_id() == GLFW_MOUSE_BUTTON_LEFT) {
-        double x, y;
-        input::get_cursor(&x, &y);
-        return on_mouse_event(x, y);
-      }
-      return false;
+      double x, y;
+      input::get_cursor(&x, &y);
+      return on_mouse_event(x, y);
     });
 
     dispatch_event<mouse_moves_event>(e, [this](auto &e) {
-      if (input::get_mouse_button(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        return on_mouse_event(e.get_x(), e.get_y());
-      }
-      return false;
+      return on_mouse_event(e.get_x(), e.get_y());
     });
+  }
+
+  void change_brush_size(int newSize) {
+    activeBrush_->set_size(newSize);
+    auto size = activeBrush_->size() * 2 * scale_;
+    image newImg{size, size, 4};
+    activeBrush_->draw_outline(newImg, scale_);
+    auto glfw = newImg.get_glfw_image();
+    application::instance()->get_window()->set_cursor(&glfw);
   }
 
 private:
@@ -77,6 +82,7 @@ private:
   std::unique_ptr<texture2d> texture_;
   sprite background;
   std::shared_ptr<sprite_render> render_;
+  std::unique_ptr<simulation_canvas::rectangle_brush> activeBrush_;
   element_id_type activeId_{1};
   bool simActive_{true};
 
@@ -85,8 +91,16 @@ private:
     int ycord = y / scale_;
 
     if (canvas.in_canvas(xcord, ycord)) {
-      canvas.add_particle(xcord, ycord, activeId_);
-      return true;
+      if (input::get_mouse_button(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        activeBrush_->set_overwrite(false);
+        canvas.add_particle(xcord, ycord, activeId_, *activeBrush_);
+        return true;
+      }
+      if (input::get_mouse_button(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+        activeBrush_->set_overwrite(true);
+        canvas.add_particle(xcord, ycord, element::empty_id(), *activeBrush_);
+        return true;
+      }
     }
     return false;
   }

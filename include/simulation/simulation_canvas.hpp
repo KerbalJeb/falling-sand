@@ -16,35 +16,71 @@
 class simulation_canvas {
 public:
 
+  using brush = std::function<void(simulation_canvas &, int, int, int)>;
+
+  struct brush_base {
+    brush_base(int radius, bool overwrite)
+        : size_(radius), overwrite_(overwrite) {}
+
+    virtual void operator()(simulation_canvas &canvas, int x, int y,
+                            element_id_type id) const = 0;
+
+    void set_size(int s) { size_ = s; }
+
+    void set_overwrite(bool o) { overwrite_ = o; }
+
+    [[nodiscard]] int size() const { return size_; }
+
+  protected:
+    int size_;
+    bool overwrite_;
+  };
+
+  struct rectangle_brush : public brush_base {
+    using brush_base::brush_base;
+
+    void operator()(simulation_canvas &canvas, int x, int y,
+                    element_id_type id) const override {
+      auto xMin = std::clamp(x - size_, 0, canvas.width_);
+      auto xMax = std::clamp(x + size_, 0, canvas.width_);
+
+      auto yMin = std::clamp(y - size_, 0, canvas.height_ - 1);
+      auto yMax = std::clamp(y + size_, 0, canvas.height_ - 1);
+
+      for (int i = xMin; i < xMax; ++i) {
+        for (int j = yMin; j < yMax; ++j) {
+          auto &e = canvas.get_particle(i, j);
+          if (overwrite_ || e.id == 0) {
+            e = canvas.elements_[id].create();
+          }
+        }
+      }
+    }
+
+    void draw_outline(image &image, int scale = 1) {
+      for (int i = 0; i < 2 * size_ * scale; ++i) {
+        for (int j = 0; j < scale; ++j) {
+          std::fill_n(&image(i, j), 4, 255);
+          std::fill_n(&image(j, i), 4, 255);
+          std::fill_n(&image(i, 2 * size_ * scale - 1 - j), 4, 255);
+          std::fill_n(&image(2 * size_ * scale - 1 - j, i), 4, 255);
+        }
+      }
+    }
+  };
+
   simulation_canvas(int width, int height)
       : buffer(width * height, {0, 0, 0, 0}), width_(width),
         height_(height), elements_(element::get_element_classes()) {}
 
+  simulation_canvas(const simulation_canvas &) = delete;
 
-  void add_particle(int x, int y, element_id_type id) {
+  simulation_canvas(simulation_canvas &&) = delete;
+
+  void add_particle(int x, int y, element_id_type id, const brush &b) {
     assert(in_canvas(x, y));
     assert(id < elements_.size());
-
-    auto xMin = std::clamp(x - 5, 0, width_);
-    auto xMax = std::clamp(x + 5, 0, width_);
-
-    auto yMin = std::clamp(y - 5, 0, height_ - 1);
-    auto yMax = std::clamp(y + 5, 0, height_ - 1);
-
-    for (int i = xMin; i < xMax; ++i) {
-      for (int j = yMin; j < yMax; ++j) {
-        auto &e = get_particle(i, j);
-        if (id != 0 && e.id == 0) {
-          e = elements_[id].create();
-        }
-      }
-    }
-  }
-
-  void delete_particle(int x, int y) {
-    assert(in_canvas(x, y));
-    auto &e = get_particle(x, y);
-    e = elements_[0].create();
+    b(*this, x, y, id);
   }
 
   void clear() {
@@ -107,6 +143,7 @@ public:
   }
 
 private:
+  friend brush_base;
   std::vector<particle_instance> buffer;
   std::vector<element> elements_;
   int width_, height_;
