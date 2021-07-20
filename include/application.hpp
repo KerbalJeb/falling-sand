@@ -12,6 +12,7 @@
 #include <memory>
 
 #include <functional>
+#include <graphics/sprite_render.hpp>
 
 class application {
 public:
@@ -61,19 +62,29 @@ public:
 
   static application *instance() { return instance_; }
 
+  static std::shared_ptr<sprite_render>
+  basic_render() { return instance_->spriteRender_; }
+
 
 private:
   template<class... Args>
   explicit application(Args... args)
       : window_(args...,
-                [this](auto &&e) {
-                  on_event(std::forward<decltype(e)>(e));
-                }) {}
+                [this](auto &&e) { on_event(std::forward<decltype(e)>(e)); }) {
+    shader_ = std::make_shared<shader_program>(
+        "resources/shaders/sprite2d.vert",
+        "resources/shaders/sprite2d.frag");
+    spriteRender_ = std::make_shared<sprite_render>(shader_,
+                                                    window_.width(),
+                                                    window_.height());
+  }
 
   static inline application *instance_{nullptr};
   window window_;
   std::vector<layer *> layers_;
   bool running_{false};
+  std::shared_ptr<sprite_render> spriteRender_;
+  std::shared_ptr<shader_program> shader_;
 
   bool on_window_close(window_close_event &e) {
     close();

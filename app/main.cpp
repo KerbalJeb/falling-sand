@@ -14,10 +14,10 @@ int main() {
   if (!glfwInit()) {
     std::exit(EXIT_FAILURE);
   }
-  auto app = application::init(width * 2, height * 2, "My Demo", GL_FALSE,
+  auto app = application::init(width * 2, height * 2 + 100, "My Demo", GL_FALSE,
                                "resources/icon.png");
-  sand_layer sandLayer{width, height};
-  ui_layer uiLayer{};
+  sand_layer sandLayer{width, height, 2, application::basic_render()};
+  ui_layer uiLayer{application::basic_render()};
   app->push_layer(&sandLayer);
   app->push_layer(&uiLayer);
 

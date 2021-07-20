@@ -9,25 +9,31 @@
 #include <input/input.hpp>
 #include <graphics/sprite_render.hpp>
 #include <simulation/simulation_canvas.hpp>
+#include <utility>
 
 
 class sand_layer : public layer {
 public:
-  sand_layer(int width, int height)
+  sand_layer(int width, int height, int scale,
+             std::shared_ptr<sprite_render> render)
       : width_(width), height_(height),
         windowHeight_(application::window_height()),
         windowWidth_(application::window_width()),
-        textureImage(width, height, 3), canvas(width, height) {
-
-    shader_ = std::make_shared<shader_program>(
-        "resources/shaders/sprite2d.vert",
-        "resources/shaders/sprite2d.frag");
-    render_ = std::make_unique<sprite_render>(shader_, width, height);
+        textureImage(width, height, 3), canvas(width, height),
+        render_(std::move(render)) {
     texture_ = std::make_unique<texture2d>(width, height,
                                            textureImage.img_ptr());
     background.texture = texture_.get();
-    background.scale = glm::vec2(width, height);
+    background.scale = glm::vec2(width * scale, height * scale);
     background.pos = glm::vec2(0);
+  }
+
+  void set_active_element(element_id_type id) {
+    activeId_ = id;
+  }
+
+  void toggle_simulation() {
+    simActive_ = !simActive_;
   }
 
   void on_update() override {
@@ -43,9 +49,11 @@ public:
       xcord = std::clamp(xcord, 0, width_ - 1);
       ycord = std::clamp(ycord, 0, height_ - 1);
 
-      canvas.add_particle(xcord, ycord, 1);
+      canvas.add_particle(xcord, ycord, activeId_);
     }
-    canvas.step_forward();
+    if (simActive_) {
+      canvas.step_forward();
+    }
     canvas.write_to_img(textureImage);
     texture_->update(textureImage.img_ptr());
     render_->draw(background);
@@ -62,9 +70,9 @@ private:
   simulation_canvas canvas;
   std::unique_ptr<texture2d> texture_;
   sprite background;
-  std::shared_ptr<shader_program> shader_;
-  std::unique_ptr<sprite_render> render_;
-
+  std::shared_ptr<sprite_render> render_;
+  element_id_type activeId_{1};
+  bool simActive_{true};
 };
 
 #endif //CPP_FALLING_SAND_SANDBOX_HPP
