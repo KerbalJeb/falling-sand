@@ -25,8 +25,8 @@ public:
     assert(in_canvas(x, y));
     assert(id < elements_.size());
 
-    auto xMin = std::clamp(x - 5, 0, width_ - 1);
-    auto xMax = std::clamp(x + 5, 0, width_ - 1);
+    auto xMin = std::clamp(x - 5, 0, width_);
+    auto xMax = std::clamp(x + 5, 0, width_);
 
     auto yMin = std::clamp(y - 5, 0, height_ - 1);
     auto yMax = std::clamp(y + 5, 0, height_ - 1);
@@ -48,11 +48,17 @@ public:
   }
 
   void step_forward() {
+    evenFrame ^= 1;
+    int xStart = evenFrame ? 0 : width_ - 1;
+    int xEnd = evenFrame ? width_ : -1;
+    int xInc = evenFrame ? 1 : -1;
+
     for (int y = height_ - 1; y >= 0; --y) {
-      for (int x = 0; x < width_; ++x) {
+      for (int x = xStart; x != xEnd; x += xInc) {
         auto &p = get_particle(x, y);
         assert(p.id < elements_.size());
-        if (p.id != 0) {
+        if (p.id != 0 && p.lastUpdated != evenFrame) {
+          p.lastUpdated = evenFrame;
           elements_[p.id].update(*this, x, y);
         }
       }
@@ -100,8 +106,7 @@ private:
   std::vector<particle_instance> buffer;
   std::vector<element> elements_;
   int width_, height_;
-  std::uniform_int_distribution<std::uint8_t> red_color{200, 255};
-  std::random_device rd;
+  bool evenFrame{true};
 };
 
 #endif //CPP_FALLING_SAND_SIMULATION_CANVAS_HPP
