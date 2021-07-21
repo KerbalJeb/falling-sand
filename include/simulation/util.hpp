@@ -10,6 +10,40 @@
 
 constexpr std::int16_t gravity_accel = 2;
 
+template<class F>
+bool for_each_in_line(int x, int y, int dx, int dy, F func) {
+  int xi = 1 - 2 * std::signbit(dx);
+  int yi = 1 - 2 * std::signbit(dy);
+
+  dx = std::abs(dx);
+  dy = std::abs(dy);
+
+  bool swapped = false;
+  if (dy > dx) {
+    std::swap(x, y);
+    std::swap(dx, dy);
+    std::swap(xi, yi);
+    swapped = true;
+  }
+  auto E = 2 * dy - dx;
+  auto A = 2 * dy;
+  auto B = 2 * (dy - dx);
+  bool done;
+  for (int i = 0; i < dx; ++i) {
+    if (E > 0) {
+      y += yi;
+      E += B;
+    } else {
+      E += A;
+    }
+    x += xi;
+    if (swapped) { done = func(y, x); }
+    else { done = func(x, y); }
+    if (done) { return false; }
+  }
+  return true;
+}
+
 template<class UnaryPredicate>
 particle_instance &
 find_in_line(simulation_canvas &canvas, int x0, int x1, int y0, int y1,
@@ -27,21 +61,5 @@ find_in_line(simulation_canvas &canvas, int x0, int x1, int y0, int y1,
   }
   return *pl;
 }
-
-class random_color {
-public:
-  random_color(float minScale, float maxScale) : dist_(minScale, maxScale) {}
-
-  void set_color(std::uint8_t &r, std::uint8_t &g, std::uint8_t &b) {
-    float scale = dist_(rd);
-    r = static_cast<std::uint8_t>(std::clamp(scale * r, 0.0f, 255.0f));
-    g = static_cast<std::uint8_t>(std::clamp(scale * g, 0.0f, 255.0f));
-    b = static_cast<std::uint8_t>(std::clamp(scale * b, 0.0f, 255.0f));
-  }
-
-private:
-  static inline std::random_device rd{};
-  std::uniform_real_distribution<float> dist_;
-};
 
 #endif //CPP_FALLING_SAND_UTIL_HPP

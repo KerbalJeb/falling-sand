@@ -28,6 +28,7 @@ public:
     activeBrush_ =
         std::make_unique<rectangle_brush>(5, false);
     change_brush_size(5);
+    activeId_ = element_manager::instance().get_idx("sand");
   }
 
   void set_active_element(element_id_type id) {
@@ -84,7 +85,7 @@ private:
   sprite background;
   std::shared_ptr<sprite_render> render_;
   std::unique_ptr<rectangle_brush> activeBrush_;
-  element_id_type activeId_{1};
+  element_id_type activeId_;
   bool simActive_{true};
 
   bool on_mouse_event(int x, int y) {

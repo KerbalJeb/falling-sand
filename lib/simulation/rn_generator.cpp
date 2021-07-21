@@ -16,3 +16,14 @@ float rng::rand_float(float min, float max) {
 float rng::rand_float() {
   return real_(rd_);
 }
+
+bool rng::random_chance_fast(int prob) {
+  return (randomValues_[++idx_ % numValues_] % prob) == 0;
+}
+
+rng::rng() {
+  randomValues_.reserve(numValues_);
+  for (int i = 0; i < numValues_; ++i) {
+    randomValues_.push_back(randInt_());
+  }
+}

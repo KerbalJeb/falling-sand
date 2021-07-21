@@ -3,9 +3,10 @@
 
 element_manager &element_manager::instance() {
   static element_manager instance{
-      {0,   0,   0,   nullptr, "empty"},
-      {194, 178, 128, 0.2f,    elements::update_sand{},  "sand"},
-      {50,  50,  200, 0.2f,    elements::update_water{}, "water"},
+      {movement_type::solid,  0,   0,   0,   nullptr, "empty"},
+      {movement_type::solid,  0,   0,   0,   nullptr, "boundary"},
+      {movement_type::powder, 194, 178, 128, 0.2f,    elements::update_sand{},  "sand"},
+      {movement_type::liquid, 50,  50,  200, 0.2f,    elements::update_water{}, "water"},
   };
   return instance;
 }

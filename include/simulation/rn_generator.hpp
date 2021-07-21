@@ -6,7 +6,7 @@
 #define CPP_FALLING_SAND_RN_GENERATOR_HPP
 
 #include <random>
-#include <memory>
+#include <vector>
 
 class rng {
 public:
@@ -17,6 +17,8 @@ public:
 
   bool random_chance(int prob);
 
+  bool random_chance_fast(int prob);
+
   float rand_float(float min, float max);
 
   float rand_float();
@@ -24,11 +26,14 @@ public:
   static rng &instance();
 
 private:
-  rng() = default;
+  rng();
 
   std::random_device rd_{};
   std::uniform_real_distribution<float> real_{0, 1};
   std::mt19937 randInt_{rd_()};
+  std::vector<std::uint32_t> randomValues_{};
+  std::size_t idx_{};
+  static constexpr std::size_t numValues_{50};
 };
 
 #endif //CPP_FALLING_SAND_RN_GENERATOR_HPP

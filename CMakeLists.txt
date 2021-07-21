@@ -8,6 +8,7 @@ find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
+find_package(Catch2 REQUIRED)
 
 add_subdirectory(external)
 
@@ -21,6 +22,10 @@ add_executable(cpp_falling_sand app/main.cpp
 
 target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm::glm stb_image)
 target_include_directories(cpp_falling_sand PRIVATE include app)
+
+add_executable(test_util test/test_util.cpp)
+target_link_libraries(test_util Catch2::Catch2 stb_image)
+target_include_directories(test_util PRIVATE include)
 
 add_custom_command(TARGET cpp_falling_sand POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

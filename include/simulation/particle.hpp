@@ -18,6 +18,13 @@ struct particle_instance {
   std::uint8_t g{};
   std::uint8_t b{};
   std::uint8_t lastUpdated{255};
+  bool is_static{false};
+
+  void set_color(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_) {
+    r = r_;
+    g = g_;
+    b = b_;
+  }
 };
 
 

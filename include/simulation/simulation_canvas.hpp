@@ -35,9 +35,11 @@ public:
 
   void save() const;
 
-  [[nodiscard]] std::size_t size() const { return width_ * height_; }
-
   void write_to_img(image &img);
+
+  void swap_particles(particle_instance &p1, particle_instance &p2) {
+    std::swap(p1, p2);
+  }
 
   [[nodiscard]] particle_instance &get_particle(int x, int y);
 
@@ -47,13 +49,22 @@ public:
 
   [[nodiscard]] bool on_floor(int y) const;
 
-  [[nodiscard]] int width() const { return width_; }
+  [[nodiscard]] int width() const { return width_ - 1; }
 
-  [[nodiscard]] int height() const { return height_; }
+  [[nodiscard]] int height() const { return height_ - 1; }
+
+  [[nodiscard]] std::size_t size() const { return width() * height(); }
 
 private:
+  void move_powder(int x, int y);
+
+  void move_fluid(int x, int y);
+
+  void move_gas(int x, int y);
+
   std::vector<particle_instance> buffer;
   int width_, height_;
+  const element_id_type boundaryId_;
   bool evenFrame{true};
 };
 
