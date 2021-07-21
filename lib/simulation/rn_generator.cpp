@@ -27,3 +27,7 @@ rng::rng() {
     randomValues_.push_back(randInt_());
   }
 }
+
+std::uint32_t rng::random_int(int max) {
+  return randomValues_[++idx_ % numValues_] % max;
+}

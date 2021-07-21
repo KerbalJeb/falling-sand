@@ -5,8 +5,14 @@ element_manager &element_manager::instance() {
   static element_manager instance{
       {movement_type::solid,  0,   0,   0,   nullptr, "empty"},
       {movement_type::solid,  0,   0,   0,   nullptr, "boundary"},
-      {movement_type::powder, 194, 178, 128, 0.2f,    elements::update_sand{},  "sand"},
-      {movement_type::liquid, 50,  50,  200, 0.2f,    elements::update_water{}, "water"},
+      {movement_type::powder, 194, 178, 128, 0.2f,    nullptr, "sand"},
+      {movement_type::liquid, 50,  50,  200, 0.2f,    nullptr, "water"},
+      {movement_type::solid,  120, 70,  30,  nullptr, "wood"},
+      {movement_type::gas,    255, 127, 42,  nullptr, "fire"},
+      {movement_type::liquid, 170, 68,  0,   nullptr, "lava"},
+      {movement_type::liquid, 120, 103, 33,  nullptr, "oil"},
+      {movement_type::solid,  77,  77,  77,  nullptr, "wall"},
+      {movement_type::gas,    42,  127, 255, nullptr, "steam"},
   };
   return instance;
 }

@@ -38,7 +38,7 @@ public:
   update_function update;
   std::string name;
   std::uint8_t red, green, blue;
-  movement_type movement_;
+  movement_type movement;
   const bool randomizeColor;
   const float colorVar{};
 

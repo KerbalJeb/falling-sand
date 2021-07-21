@@ -31,13 +31,35 @@ void simulation_canvas::step_forward() {
       auto &e = em.get_element(p.id);
 
       p.lastUpdated = evenFrame;
+
       // Update vel
-      p.vy += gravity_accel;
+      if (e.movement != movement_type::solid) {
+        p.vy += gravity_accel;
+      }
+
       auto &below = get_particle(x, y + 1);
-      if (below.id) {
-        auto offset = 2 * rng::instance().random_chance_fast(2) - 1;
-        auto &other = get_particle(x + offset, y + 1);
-        if (!other.id) { std::swap(p, other); }
+      if ((e.movement == movement_type::powder ||
+           e.movement == movement_type::liquid) && below.id) {
+        const auto &eBelow = em.get_element(below.id);
+
+        if (eBelow.movement == movement_type::liquid &&
+            e.movement == movement_type::powder) {
+          std::swap(p, below);
+        } else {
+          // Only checking one direction removes artifacts
+          // from the horizontal update direction
+          auto dir = 2 * rng::instance().random_chance_fast(2) - 1;
+          auto &other = get_particle(x + dir, y + 1);
+          if (!other.id) { std::swap(p, other); }
+
+          else if (e.movement == movement_type::liquid) {
+            auto
+                &neighbor =
+                get_particle(std::clamp(x + 5 * dir, 0, width() - 1), y);
+            if (!neighbor.id) { std::swap(p, neighbor); }
+          }
+        }
+        p.vy = 0;
       }
 
       particle_instance *lastValid{nullptr};

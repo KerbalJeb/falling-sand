@@ -19,6 +19,8 @@ public:
 
   bool random_chance_fast(int prob);
 
+  std::uint32_t random_int(int max);
+
   float rand_float(float min, float max);
 
   float rand_float();

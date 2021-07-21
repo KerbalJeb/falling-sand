@@ -21,7 +21,7 @@ element::element(movement_type movement, uint8_t red, uint8_t green,
                  uint8_t blue, element::update_function update,
                  std::string name_)
     : update(std::move(update)),
-      movement_(movement),
+      movement(movement),
       red{red}, green{green}, blue{blue},
       name(std::move(name_)),
       randomizeColor{false} {
@@ -32,7 +32,7 @@ element::element(movement_type movement, uint8_t red, uint8_t green,
                  uint8_t blue, float colorVariation,
                  element::update_function update, std::string name_)
     : update(std::move(update)),
-      movement_(movement),
+      movement(movement),
       name(std::move(name_)),
       red{red}, green{green}, blue{blue},
       randomizeColor{true},
