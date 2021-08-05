@@ -17,10 +17,6 @@ element_manager &element_manager::instance() {
   return instance;
 }
 
-const std::vector<element> &element_manager::elements() const {
-  return allElements_;
-}
-
 element_manager::element_manager(std::initializer_list<element> init)
     : allElements_(init) {
   for (int i = 0; i < allElements_.size(); ++i) {

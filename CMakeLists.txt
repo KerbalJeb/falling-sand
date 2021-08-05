@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(cpp_falling_sand)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 find_package(glfw3 3.3 REQUIRED)

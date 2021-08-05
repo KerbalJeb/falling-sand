@@ -1,11 +1,12 @@
 #include <simulation/simulation_canvas.hpp>
 #include <simulation/util.hpp>
 #include <simulation/rn_generator.hpp>
+#include <fstream>
 
 simulation_canvas::simulation_canvas(int width, int height)
-    : buffer((width + 1) * (height + 1), {0, 0, 0, 0}),
-      width_(width + 1),
-      height_(height + 1),
+    : buffer((width + 2) * (height + 2), {0, 0, 0, 0}),
+      width_(width + 2),
+      height_(height + 2),
       boundaryId_(element_manager::instance().get_idx("boundary")) {
   // Fill the outside layer with special element to avoid boundary checks
   for (int x = 0; x < width_; ++x) {
@@ -21,10 +22,9 @@ simulation_canvas::simulation_canvas(int width, int height)
 
 void simulation_canvas::step_forward() {
   evenFrame = !evenFrame;
-  auto &em = element_manager::instance();
 
-  for (int y = 1; y < height(); ++y) {
-    for (int x = 1; x < width(); ++x) {
+  for (int y = 1; y <= height(); ++y) {
+    for (int x = 1; x <= width(); ++x) {
       auto &p = get_particle(x, y);
       assert(p.id < element_manager::instance().size());
       if (!p.id || p.lastUpdated == evenFrame) { continue; }
@@ -146,4 +146,103 @@ void simulation_canvas::move_fluid(int x, int y) {
 
 void simulation_canvas::move_gas(int x, int y) {
 
+}
+
+bool simulation_canvas::save(const std::filesystem::path &path) const {
+  std::ofstream f{path};
+  assert(f.is_open());
+  if (!f.is_open()) {
+    return false;
+  }
+
+  f << width() << " " << height() << std::endl;
+
+  for (int y = 1; y <= height(); ++y) {
+    for (int x = 1; x <= width(); ++x) {
+      const auto &p = get_particle(x, y);
+      f << (unsigned int) p.id;
+      if (x < width()) { f << ","; }
+    }
+    f << std::endl;
+  }
+  f.close();
+  return true;
+}
+
+bool simulation_canvas::load(const std::filesystem::path &path) {
+  std::ifstream f{path};
+  assert(f.is_open());
+  if (!f.is_open()) { return false; }
+
+  int width, height;
+  f >> width >> height;
+  assert(f.is_open());
+  assert(width == this->width());
+  assert(height == this->height());
+  std::vector<element_id_type> ids;
+  std::string line;
+  std::string id_str;
+
+  ids.reserve(width * height);
+  while (f.good()) {
+    std::getline(f, line);
+    std::stringstream s{line};
+    auto max_id = em.size();
+
+
+    while (std::getline(s, id_str, ',')) {
+      char *end;
+      errno = 0;
+      auto int_id = std::strtol(id_str.c_str(), &end, 10);
+
+      if (*end != '\0' || int_id >= max_id || errno != 0) {
+        return false;
+      }
+      ids.push_back(int_id);
+    }
+  }
+  assert(ids.size() == width * height);
+  if (ids.size() != width * height) { return false; }
+
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      auto &p = get_particle(x + 1, y + 1);
+      auto i = ids[y * width + x];
+      p = em.get_element(i).create();
+    }
+  }
+
+  return true;
+}
+
+bool simulation_canvas::save() const {
+  std::string filename;
+  int save_idx = 0;
+
+  while (std::filesystem::exists(filename = create_save_file_name(save_idx))) {
+    ++save_idx;
+    // Only keep 100 saves and override last save if over 100
+    if (save_idx >= 100) {
+      break;
+    }
+  }
+  return save(filename);
+}
+
+std::string simulation_canvas::create_save_file_name(int save_idx) const {
+  auto size_s = std::snprintf(
+      nullptr,
+      0,
+      "%s-%d.%s",
+      save_file_name_.c_str(),
+      save_idx,
+      save_file_ext_.c_str());
+  ++size_s;
+  assert(size_s > 0);
+  auto buf = std::make_unique<char[]>(size_s);
+  std::snprintf(buf.get(), size_s, "%s-%d.%s",
+                save_file_name_.c_str(),
+                save_idx,
+                save_file_ext_.c_str());
+  return std::string{buf.get(), buf.get() + size_s - 1};
 }

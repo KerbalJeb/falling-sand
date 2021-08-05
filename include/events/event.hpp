@@ -6,7 +6,8 @@ enum class event_type {
   None = 0,
   WindowClose,
   KeyPressed, KeyReleased, KeyTyped,
-  MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+  MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
+  PathDrop
 };
 
 class event {

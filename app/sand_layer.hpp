@@ -66,6 +66,10 @@ public:
     dispatch_event<mouse_moves_event>(e, [this](auto &e) {
       return on_mouse_event(e.get_x(), e.get_y());
     });
+
+    dispatch_event<drop_event>(e, [this](auto &e) {
+      return on_drop(e);
+    });
   }
 
   void change_brush_size(int newSize) {
@@ -123,9 +127,21 @@ private:
         change_brush_size(activeBrush_->size() +
                           std::clamp(activeBrush_->size() / 5, 1, 20));
         break;
+      case GLFW_KEY_S:
+        if (e.modifiers() & GLFW_MOD_CONTROL) {
+          canvas.save();
+          std::cout << "Saving..." << std::endl;
+          break;
+        }
       default:
         return false;
     }
+    return true;
+  }
+
+  bool on_drop(drop_event &e) {
+    auto &path = e.get_paths()[0];
+    canvas.load(path);
     return true;
   }
 };

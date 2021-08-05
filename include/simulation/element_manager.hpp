@@ -19,7 +19,8 @@ public:
 
   static element_manager &instance();
 
-  [[nodiscard]] const std::vector<element> &elements() const;
+  [[nodiscard]] const std::vector<element> &
+  elements() const { return allElements_; }
 
   [[nodiscard]] std::size_t get_idx(const std::string &name) const;
 

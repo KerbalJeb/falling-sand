@@ -7,6 +7,7 @@
 #include <events/application_event.hpp>
 #include <events/mouse_events.hpp>
 #include <events/key_events.hpp>
+#include <events/drop_event.hpp>
 #include <graphics/image.hpp>
 
 #include <GL/glew.h>
@@ -69,6 +70,12 @@ public:
     glfwSetCursorPosCallback(window_, [](auto w, double x, double y) {
       auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
       mouse_moves_event e{static_cast<int>(x), static_cast<int>(y)};
+      data->event_handler(e);
+    });
+
+    glfwSetDropCallback(window_, [](auto w, int count, const char **paths) {
+      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
+      drop_event e{std::vector<std::string>{paths, paths + count}};
       data->event_handler(e);
     });
   }

@@ -31,9 +31,11 @@ public:
 
   void step_forward();
 
-  void load();
+  bool load(const std::filesystem::path &path);
 
-  void save() const;
+  bool save(const std::filesystem::path &path) const;
+
+  bool save() const;
 
   void write_to_img(image &img);
 
@@ -49,9 +51,9 @@ public:
 
   [[nodiscard]] bool on_floor(int y) const;
 
-  [[nodiscard]] int width() const { return width_ - 1; }
+  [[nodiscard]] int width() const { return width_ - 2; }
 
-  [[nodiscard]] int height() const { return height_ - 1; }
+  [[nodiscard]] int height() const { return height_ - 2; }
 
   [[nodiscard]] std::size_t size() const { return width() * height(); }
 
@@ -66,6 +68,12 @@ private:
   int width_, height_;
   const element_id_type boundaryId_;
   bool evenFrame{true};
+  const element_manager &em = element_manager::instance();
+
+  std::string create_save_file_name(int save_idx) const;
+
+  std::string save_file_name_{"falling-sand"};
+  std::string save_file_ext_{"sav"};
 };
 
 #endif //CPP_FALLING_SAND_SIMULATION_CANVAS_HPP
