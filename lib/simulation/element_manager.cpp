@@ -22,6 +22,24 @@ element_manager::element_manager(std::initializer_list<element> init)
   for (int i = 0; i < allElements_.size(); ++i) {
     allElements_[i].type = i;
   }
+  displacementRules_.reserve(size());
+  for (int i = 0; i < allElements_.size(); ++i) {
+    displacementRules_.emplace_back(size(), false);
+    for (int j = 0; j < allElements_.size(); ++j) {
+      auto &e1 = get_element(i);
+      auto &e2 = get_element(j);
+      if (e2.type == 0) {
+        displacementRules_[i][j] = true;
+      }
+      if (e1.movement == movement_type::powder &&
+          (e2.movement == movement_type::liquid || e2.movement == movement_type::gas)) {
+        displacementRules_[i][j] = true;
+      }
+      if (e1.movement == movement_type::liquid && e2.movement == movement_type::gas) {
+        displacementRules_[i][j] = true;
+      }
+    }
+  }
 }
 
 std::size_t element_manager::get_idx(const std::string &name) const {
@@ -40,3 +58,7 @@ const element &element_manager::get_element(std::size_t idx) const {
   return allElements_[idx];
 }
 
+bool
+element_manager::can_displace(element_id_type p1, element_id_type p2) const {
+  return displacementRules_[p1][p2];
+}

@@ -28,10 +28,13 @@ public:
 
   [[nodiscard]] const element &get_element(std::size_t idx) const;
 
+  [[nodiscard]] bool can_displace(element_id_type p1, element_id_type p2) const;
+
 private:
   element_manager(std::initializer_list<element> init);
 
   std::vector<element> allElements_;
+  std::vector<std::vector<bool>> displacementRules_;
 };
 
 #endif //CPP_FALLING_SAND_ELEMENT_MANAGER_HPP

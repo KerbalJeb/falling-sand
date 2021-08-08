@@ -32,52 +32,32 @@ void simulation_canvas::step_forward() {
 
       p.lastUpdated = evenFrame;
 
-      // Update vel
-      if (e.movement != movement_type::solid) {
-        p.vy += gravity_accel;
-      }
-
-      auto &below = get_particle(x, y + 1);
-      if ((e.movement == movement_type::powder ||
-           e.movement == movement_type::liquid) && below.id) {
-        const auto &eBelow = em.get_element(below.id);
-
-        if (eBelow.movement == movement_type::liquid &&
-            e.movement == movement_type::powder) {
-          std::swap(p, below);
-        } else {
-          // Only checking one direction removes artifacts
-          // from the horizontal update direction
-          auto dir = 2 * rng::instance().random_chance_fast(2) - 1;
-          auto &other = get_particle(x + dir, y + 1);
-          if (!other.id) { std::swap(p, other); }
-
-          else if (e.movement == movement_type::liquid) {
-            auto
-                &neighbor =
-                get_particle(std::clamp(x + 5 * dir, 0, width() - 1), y);
-            if (!neighbor.id) { std::swap(p, neighbor); }
-          }
-        }
-        p.vy = 0;
+      switch (e.movement) {
+        case movement_type::powder:
+          move_powder(x, y, p, e);
+          break;
+        case movement_type::solid:
+          break;
+        case movement_type::liquid:
+          move_liquid(x, y, p, e);
+          break;
+        case movement_type::gas:
+          move_gas(x, y, p, e);
+          break;
       }
 
       particle_instance *lastValid{nullptr};
-      bool
-          finished =
-          for_each_in_line(x, y, p.vx, p.vy, [&lastValid, this](int x, int y) {
-            auto &p = get_particle(x, y);
-            if (p.id) { return true; }
-            lastValid = &p;
+      int i = p.id;
+      bool finished =
+          for_each_in_line(x, y, p.vx, p.vy, [&lastValid, this, i](int x, int y) {
+            auto &p1 = get_particle(x, y);
+            if (!em.can_displace(i, p1.id)) { return true; }
+            lastValid = &p1;
             return false;
           });
 
       if (!finished) { p.vy = 0; }
       if (lastValid) { swap_particles(p, *lastValid); }
-
-      // Apply rules
-//      if (!e.update) { continue; }
-//      em.get_element(p.id).update(*this, x, y);
     }
   }
 }
@@ -136,16 +116,63 @@ bool simulation_canvas::on_floor(int y) const {
   return y == height_ - 1;
 }
 
-void simulation_canvas::move_powder(int x, int y) {
+bool
+simulation_canvas::move_powder(int x, int y, particle_instance &p,
+                               const element &e) {
+  auto &below = get_particle(x, y + 1);
+  if (!below.id) {
+    p.vy += gravity_accel;
+    return true;
+  }
+  constexpr std::int16_t dirs[] = {-1, 1};
+  const int rand_offset = static_cast<int>(rn_gen.random_int(1));
 
+  auto dir = dirs[rand_offset];
+  auto &neighbour = get_particle(x + dir, y + 1);
+  if (em.can_displace(p.id, neighbour.id)) {
+    swap_particles(p, neighbour);
+    return true;
+  }
+  if (em.can_displace(p.id, below.id)) {
+    swap_particles(p, below);
+    return true;
+  }
+  return false;
 }
 
-void simulation_canvas::move_fluid(int x, int y) {
+void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const element &e) {
+  // todo: improve liquid movement rules
+  auto &below = get_particle(x, y + 1);
+  if (em.can_displace(p.id, below.id)) {
+    p.vy += gravity_accel;
+    p.vx = 0;
+    return;
+  }
 
+  auto dir = 2 * static_cast<int>(rn_gen.random_int(1)) - 1;
+  auto &neighbour1 = get_particle(x + dir, y + 1);
+  auto &neighbour2 = get_particle(x - dir, y + 1);
+
+  if (em.can_displace(p.id, neighbour1.id)) {
+    swap_particles(p, neighbour1);
+    return;
+  } else if (em.can_displace(p.id, neighbour2.id)) {
+    swap_particles(p, neighbour2);
+    return;
+  }
+
+  auto &horizontalNeighbour1 = get_particle(x + dir, y);
+  auto &horizontalNeighbour2 = get_particle(x - dir, y);
+  int spread = 5;
+  if (!horizontalNeighbour2.id) { p.vx = -spread * dir; }
 }
 
-void simulation_canvas::move_gas(int x, int y) {
-
+void simulation_canvas::move_gas(int x, int y, particle_instance &p, const element &e) {
+  int speed = 6;
+  int vx = static_cast<int>(rn_gen.random_int(speed)) - speed / 2;
+  int vy = static_cast<int>(rn_gen.random_int(speed)) - speed / 2;
+  p.vy = vy;
+  p.vx = vx;
 }
 
 bool simulation_canvas::save(const std::filesystem::path &path) const {

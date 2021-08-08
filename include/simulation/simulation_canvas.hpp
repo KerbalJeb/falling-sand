@@ -12,6 +12,7 @@
 #include <simulation/particle.hpp>
 #include <simulation/element.hpp>
 #include <simulation/element_manager.hpp>
+#include <simulation/rn_generator.hpp>
 #include <graphics/image.hpp>
 
 class simulation_canvas {
@@ -58,19 +59,20 @@ public:
   [[nodiscard]] std::size_t size() const { return width() * height(); }
 
 private:
-  void move_powder(int x, int y);
+  bool move_powder(int x, int y, particle_instance &p, const element &e);
 
-  void move_fluid(int x, int y);
+  void move_liquid(int x, int y, particle_instance &p, const element &e);
 
-  void move_gas(int x, int y);
+  void move_gas(int x, int y, particle_instance &p, const element &e);
 
   std::vector<particle_instance> buffer;
   int width_, height_;
   const element_id_type boundaryId_;
   bool evenFrame{true};
   const element_manager &em = element_manager::instance();
+  rng &rn_gen = rng::instance();
 
-  std::string create_save_file_name(int save_idx) const;
+  [[nodiscard]] std::string create_save_file_name(int save_idx) const;
 
   std::string save_file_name_{"falling-sand"};
   std::string save_file_ext_{"sav"};
