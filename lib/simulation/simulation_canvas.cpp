@@ -26,20 +26,35 @@ void simulation_canvas::step_forward() {
   for (int y = 1; y <= height(); ++y) {
     for (int x = 1; x <= width(); ++x) {
       auto &p = get_particle(x, y);
-      assert(p.id < element_manager::instance().size());
+      assert(p.id < em.size());
       if (!p.id || p.lastUpdated == evenFrame) { continue; }
       auto &e = em.get_element(p.id);
 
       p.lastUpdated = evenFrame;
 
       auto &lifetime = em.get_lifetime_rule(p.id);
-      if (lifetime.min_lifetime > 0 && lifetime.min_lifetime < p.age) {
+      if (lifetime.transition_prob > 0 && lifetime.min_lifetime < p.age) {
         if (rn_gen.random_chance(lifetime.transition_prob)) {
           p = em.get_element(lifetime.new_element).create();
           continue;
         }
       }
       p.age += 1;
+
+      constexpr std::pair<int, int> neighbors_offsets[]{
+          {1,  0},
+          {-1, 0},
+          {0,  -1},
+          {0,  1}};
+
+      for (auto &offset:neighbors_offsets) {
+        auto &neighbor = get_particle(x + offset.first, y + offset.second);
+        auto &rule = em.get_contact_rule(p.id, neighbor.id);
+        if (rn_gen.random_chance(rule.transform_chance)) {
+          neighbor = em.get_element(rule.transform_element).create();
+        }
+      }
+
       switch (e.movement) {
         case movement_type::powder:
           move_powder(x, y, p, e);

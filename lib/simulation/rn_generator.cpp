@@ -6,6 +6,7 @@ rng &rng::instance() {
 }
 
 bool rng::random_chance(float prob) {
+  if (prob == 0) { return false; }
   ++idx_;
   idx_ %= numValues_;
   return rand_float() < (prob + minRealValue_);

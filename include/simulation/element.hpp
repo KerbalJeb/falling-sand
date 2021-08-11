@@ -19,14 +19,14 @@ enum class movement_type {
 struct element_initializer {
   struct lifetime {
     int min_lifetime{0};
-    int transition_period{};
+    float transition_period{0};
     std::string new_type_name{};
   };
 
   struct contact_rule {
-    float transform_chance{0};
-    std::string transform_element_name{0};
     std::string other_element_name{0};
+    std::string transform_element_name{0};
+    float transform_chance{0};
   };
 
   std::string name;
