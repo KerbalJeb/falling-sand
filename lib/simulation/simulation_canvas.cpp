@@ -32,6 +32,14 @@ void simulation_canvas::step_forward() {
 
       p.lastUpdated = evenFrame;
 
+      auto &lifetime = em.get_lifetime_rule(p.id);
+      if (lifetime.min_lifetime > 0 && lifetime.min_lifetime < p.age) {
+        if (rn_gen.random_chance(lifetime.transition_prob)) {
+          p = em.get_element(lifetime.new_element).create();
+          continue;
+        }
+      }
+      p.age += 1;
       switch (e.movement) {
         case movement_type::powder:
           move_powder(x, y, p, e);
@@ -51,7 +59,7 @@ void simulation_canvas::step_forward() {
       bool finished =
           for_each_in_line(x, y, p.vx, p.vy, [&lastValid, this, i](int x, int y) {
             auto &p1 = get_particle(x, y);
-            if (!em.can_displace(i, p1.id)) { return true; }
+            if (!em.get_displacement_rule(i, p1.id)) { return true; }
             lastValid = &p1;
             return false;
           });
@@ -67,6 +75,11 @@ void simulation_canvas::add_particle(int x, int y, element_id_type id,
   assert(in_canvas(x, y));
   assert(id < element_manager::instance().size());
   b(*this, x, y, id);
+}
+
+
+void simulation_canvas::add_particle(int x, int y, element_id_type id) {
+  get_particle(x, y) = em.get_element(id).create();
 }
 
 void simulation_canvas::clear() {
@@ -129,11 +142,11 @@ simulation_canvas::move_powder(int x, int y, particle_instance &p,
 
   auto dir = dirs[rand_offset];
   auto &neighbour = get_particle(x + dir, y + 1);
-  if (em.can_displace(p.id, neighbour.id)) {
+  if (em.get_displacement_rule(p.id, neighbour.id)) {
     swap_particles(p, neighbour);
     return true;
   }
-  if (em.can_displace(p.id, below.id)) {
+  if (em.get_displacement_rule(p.id, below.id)) {
     swap_particles(p, below);
     return true;
   }
@@ -143,7 +156,7 @@ simulation_canvas::move_powder(int x, int y, particle_instance &p,
 void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const element &e) {
   // todo: improve liquid movement rules
   auto &below = get_particle(x, y + 1);
-  if (em.can_displace(p.id, below.id)) {
+  if (em.get_displacement_rule(p.id, below.id)) {
     p.vy += gravity_accel;
     p.vx = 0;
     return;
@@ -153,10 +166,10 @@ void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const el
   auto &neighbour1 = get_particle(x + dir, y + 1);
   auto &neighbour2 = get_particle(x - dir, y + 1);
 
-  if (em.can_displace(p.id, neighbour1.id)) {
+  if (em.get_displacement_rule(p.id, neighbour1.id)) {
     swap_particles(p, neighbour1);
     return;
-  } else if (em.can_displace(p.id, neighbour2.id)) {
+  } else if (em.get_displacement_rule(p.id, neighbour2.id)) {
     swap_particles(p, neighbour2);
     return;
   }

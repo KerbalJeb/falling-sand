@@ -15,17 +15,13 @@ public:
 
   rng(rng &&) = delete;
 
-  bool random_chance(int prob);
-
-  bool random_chance_fast(int prob);
+  bool random_chance(float prob);
 
   std::uint32_t random_int(int max);
 
-  float rand_float(float min, float max);
+  static rng &instance();
 
   float rand_float();
-
-  static rng &instance();
 
 private:
   rng();
@@ -34,8 +30,10 @@ private:
   std::uniform_real_distribution<float> real_{0, 1};
   std::mt19937 randInt_{rd_()};
   std::vector<std::uint32_t> randomValues_{};
+  std::vector<float> randomFloatValues_{};
   std::size_t idx_{};
-  static constexpr std::size_t numValues_{50};
+  static constexpr std::size_t numValues_{250};
+  float minRealValue_;
 };
 
 #endif //CPP_FALLING_SAND_RN_GENERATOR_HPP

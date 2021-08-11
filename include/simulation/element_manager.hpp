@@ -11,6 +11,18 @@
 
 class element_manager {
 public:
+
+  struct lifetime_rule {
+    std::uint16_t min_lifetime{0};
+    float transition_prob{0};
+    element_id_type new_element{0};
+  };
+
+  struct contact_rule {
+    float transform_chance{0};
+    element_id_type transform_element{0};
+  };
+
   element_manager() = delete;
 
   element_manager(const element_manager &) = delete;
@@ -28,13 +40,22 @@ public:
 
   [[nodiscard]] const element &get_element(std::size_t idx) const;
 
-  [[nodiscard]] bool can_displace(element_id_type p1, element_id_type p2) const;
+  [[nodiscard]] bool
+  get_displacement_rule(element_id_type p, element_id_type s) const { return displacementRules_[p][s]; }
+
+  [[nodiscard]] const lifetime_rule &
+  get_lifetime_rule(element_id_type p) const { return lifetimeRules_[p]; }
+
+  [[nodiscard]] const contact_rule &
+  get_contact_rule(element_id_type p, element_id_type s) const { return contactRules_[p * size() + s]; }
 
 private:
-  element_manager(std::initializer_list<element> init);
+  element_manager(const std::initializer_list<element_initializer> &init);
 
   std::vector<element> allElements_;
   std::vector<std::vector<bool>> displacementRules_;
+  std::vector<contact_rule> contactRules_;
+  std::vector<lifetime_rule> lifetimeRules_;
 };
 
 #endif //CPP_FALLING_SAND_ELEMENT_MANAGER_HPP

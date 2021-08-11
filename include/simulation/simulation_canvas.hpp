@@ -28,6 +28,8 @@ public:
 
   void add_particle(int x, int y, element_id_type id, const brush &b);
 
+  void add_particle(int x, int y, element_id_type id);
+
   void clear();
 
   void step_forward();

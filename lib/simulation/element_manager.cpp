@@ -3,26 +3,44 @@
 
 element_manager &element_manager::instance() {
   static element_manager instance{
-      {movement_type::solid,  0,   0,   0,   nullptr, "empty"},
-      {movement_type::solid,  0,   0,   0,   nullptr, "boundary"},
-      {movement_type::powder, 194, 178, 128, 0.2f,    nullptr, "sand"},
-      {movement_type::liquid, 50,  50,  200, 0.2f,    nullptr, "water"},
-      {movement_type::solid,  120, 70,  30,  nullptr, "wood"},
-      {movement_type::gas,    255, 127, 42,  nullptr, "fire"},
-      {movement_type::liquid, 170, 68,  0,   nullptr, "lava"},
-      {movement_type::liquid, 120, 103, 33,  nullptr, "oil"},
-      {movement_type::solid,  77,  77,  77,  nullptr, "wall"},
-      {movement_type::gas,    42,  127, 255, nullptr, "steam"},
+      {"empty",    movement_type::solid,  0,   0,   0,   0, {0,   0,   {}},      {}},
+      {"boundary", movement_type::solid,  0,   0,   0,   0, {0,   0,   {}},      {}},
+      {"sand",     movement_type::powder, 194, 178, 128, 0, {0,   0,   {}},      {}},
+      {"water",    movement_type::liquid, 50,  50,  200, 0, {0,   0,   {}},      {}},
+      {"wood",     movement_type::solid,  120, 70,  30,  0, {0,   0,   {}},      {}},
+      {"fire",     movement_type::gas,    255, 127, 42,  0, {30,  120, "empty"}, {}},
+      {"lava",     movement_type::liquid, 170, 68,  0,   0, {0,   0,   {}},      {}},
+      {"oil",      movement_type::liquid, 120, 103, 33,  0, {0,   0,   {}},      {}},
+      {"wall",     movement_type::solid,  77,  77,  77,  0, {0,   0,   {}},      {}},
+      {"steam",    movement_type::gas,    42,  127, 255, 0, {200, 500, "water"}, {}},
   };
   return instance;
 }
 
-element_manager::element_manager(std::initializer_list<element> init)
-    : allElements_(init) {
-  for (int i = 0; i < allElements_.size(); ++i) {
-    allElements_[i].type = i;
+element_manager::element_manager(const std::initializer_list<element_initializer> &init) :
+    contactRules_(init.size() * init.size()), lifetimeRules_(init.size()) {
+
+  allElements_.reserve(init.size());
+  element_id_type idx = 0;
+  for (const auto &elem:init) {
+    allElements_.emplace_back(elem, idx);
+    ++idx;
   }
-  displacementRules_.reserve(size());
+
+  for (const auto &elem:init) {
+    // A bit inefficient, but it only happens once
+    const auto &lifetime_rule_init = elem.lifetime_rule;
+    // A min_lifetime of zero means no lifetime rule is in effect
+    if (lifetime_rule_init.min_lifetime != 0) {
+      auto new_element_id = get_idx(lifetime_rule_init.new_type_name);
+      auto old_element_id = get_idx(elem.name);
+      auto &life_rule = lifetimeRules_[old_element_id];
+      life_rule.min_lifetime = lifetime_rule_init.min_lifetime;
+      life_rule.transition_prob = 1 / (float) lifetime_rule_init.transition_period;
+      life_rule.new_element = new_element_id;
+    }
+  }
+
   for (int i = 0; i < allElements_.size(); ++i) {
     displacementRules_.emplace_back(size(), false);
     for (int j = 0; j < allElements_.size(); ++j) {
@@ -56,9 +74,4 @@ std::size_t element_manager::size() const {
 const element &element_manager::get_element(std::size_t idx) const {
   assert(idx < allElements_.size());
   return allElements_[idx];
-}
-
-bool
-element_manager::can_displace(element_id_type p1, element_id_type p2) const {
-  return displacementRules_[p1][p2];
 }

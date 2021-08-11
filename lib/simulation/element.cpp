@@ -17,25 +17,13 @@ void element::randomize(particle_instance &p) const {
   p.b = static_cast<std::uint8_t>(scale * p.b);
 }
 
-element::element(movement_type movement, uint8_t red, uint8_t green,
-                 uint8_t blue, element::update_function update,
-                 std::string name_)
-    : update(std::move(update)),
-      movement(movement),
-      red{red}, green{green}, blue{blue},
-      name(std::move(name_)),
-      randomizeColor{false} {
-
-}
-
-element::element(movement_type movement, uint8_t red, uint8_t green,
-                 uint8_t blue, float colorVariation,
-                 element::update_function update, std::string name_)
-    : update(std::move(update)),
-      movement(movement),
-      name(std::move(name_)),
-      red{red}, green{green}, blue{blue},
-      randomizeColor{true},
-      colorVar{colorVariation} {
-
+element::element(const element_initializer &init, element_id_type id) {
+  type = id;
+  name = init.name;
+  red = init.red;
+  green = init.green;
+  blue = init.blue;
+  movement = init.movement;
+  randomizeColor = init.color_variation > 0;
+  colorVar = init.color_variation;
 }
