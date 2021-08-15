@@ -27,10 +27,12 @@ rng::rng() {
   *std::min_element(randomFloatValues_.begin(), randomFloatValues_.end());
 }
 
-std::uint32_t rng::random_int(int max) {
+std::uint32_t rng::random_int(int max, int min) {
   ++idx_;
   idx_ %= numValues_;
-  return randomValues_[idx_] % (max + 1);
+  max -= min;
+  ++max;
+  return min + randomValues_[idx_] % max;
 }
 
 float rng::rand_float() {

@@ -101,7 +101,7 @@ public:
 
   void change_brush_size(int newSize) {
     activeBrush_->set_radius(newSize);
-    auto size = activeBrush_->size() * 2 * scale_;
+    auto size = std::max(activeBrush_->size() * 2 * scale_, scale_);
     image newImg{size, size, 4};
     activeBrush_->draw_outline(newImg, scale_);
     auto glfw = newImg.get_glfw_image();

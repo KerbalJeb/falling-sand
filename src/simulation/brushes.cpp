@@ -26,6 +26,10 @@ void rectangle_brush::operator()(simulation_canvas &canvas, int x, int y,
 }
 
 void rectangle_brush::draw_outline(image &image, int scale) {
+  if (size_ == 0) {
+    std::fill_n(image(0, 0), 4 * scale * scale, 255);
+    return;
+  }
   for (int i = 0; i < 2 * size_ * scale; ++i) {
     for (int j = 0; j < scale; ++j) {
       std::fill_n(image(i, j), 4, 255);

@@ -20,6 +20,9 @@ struct particle_instance {
   std::uint8_t b{};
   bool lastUpdated{};
 
+  operator bool() const {
+    return id;
+  }
 };
 
 

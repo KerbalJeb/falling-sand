@@ -22,8 +22,9 @@ public:
   // p must be between 0 and 1
   bool random_chance(float p);
 
-  // Get a random int between 0 and max
-  std::uint32_t random_int(int max);
+  // Get a random int between min and max
+  // max must be greater than min
+  std::uint32_t random_int(int max, int min = 0);
 
   static rng &instance();
 

@@ -13,12 +13,16 @@ simulation_canvas::simulation_canvas(int width, int height, element_manager em)
 
 void simulation_canvas::step_forward() {
   evenFrame = !evenFrame;
+  // Swap update directions every frame to prevent odd artifacts
+  int xInc = 1 - 2 * evenFrame;
+  int xStart = evenFrame * width() - evenFrame;
+  int xEnd = width() - xStart - 2 * evenFrame;
 
   for (int y = 0; y < height(); ++y) {
-    for (int x = 0; x < width(); ++x) {
+    for (int x = xStart; x != xEnd; x += xInc) {
       auto &p = get_particle(x, y);
       assert(p.id < elementManager_.size());
-      if (!p.id || p.lastUpdated == evenFrame) { continue; }
+      if (!p || p.lastUpdated == evenFrame) { continue; }
       auto &e = elementManager_.get_element(p.id);
 
       p.lastUpdated = evenFrame;
@@ -60,9 +64,8 @@ void simulation_canvas::step_forward() {
           break;
       }
 
-      particle_instance *lastValid{nullptr};
+      particle_instance *lastValid{&p};
       int i = p.id;
-      // todo: improve rules to particle can move if only blocked in one direction
       bool finished =
           for_each_in_line(x, y, p.vx, p.vy, [&lastValid, this, i](int x, int y) {
             auto &p1 = get_particle(x, y);
@@ -118,6 +121,8 @@ particle_instance &simulation_canvas::get_particle(int x, int y) {
 }
 
 const particle_instance &simulation_canvas::get_particle(int x, int y) const {
+  ++x;
+  ++y;
   assert(in_bounds(x, y));
   return buffer.at(y * width_ + x);
 }
