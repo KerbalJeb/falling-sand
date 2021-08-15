@@ -7,18 +7,27 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(glm REQUIRED)
+find_package(glm)
 find_package(Catch2 REQUIRED)
+
+include(FetchContent)
+if (NOT glm_FOUND)
+    FetchContent_Declare(glm
+            GIT_REPOSITORY https://github.com/g-truc/glm.git
+            GIT_TAG "0.9.9.8"
+            )
+    FetchContent_MakeAvailable(glm)
+endif ()
 
 add_subdirectory(external)
 
 add_executable(cpp_falling_sand app/main.cpp
-        lib/simulation/brushes.cpp
-        lib/simulation/element.cpp
-        lib/simulation/element_manager.cpp
-        lib/simulation/element_update.cpp
-        lib/simulation/rn_generator.cpp
-        lib/simulation/simulation_canvas.cpp)
+        src/simulation/brushes.cpp
+        src/simulation/element.cpp
+        src/simulation/element_manager.cpp
+        src/simulation/element_update.cpp
+        src/simulation/rn_generator.cpp
+        src/simulation/simulation_canvas.cpp)
 
 target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm::glm stb_image)
 target_include_directories(cpp_falling_sand PRIVATE include app)
