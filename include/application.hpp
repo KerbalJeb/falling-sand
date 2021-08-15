@@ -19,7 +19,9 @@ public:
   template<class... Args>
   static application *
   init(const std::filesystem::path &vertex_path, const std::filesystem::path &fragment_path, Args &&... args) {
-
+    if (!glfwInit()) {
+      std::exit(EXIT_FAILURE);
+    }
     if (instance_ == nullptr) {
       instance_ = new application(vertex_path, fragment_path, args...);
     }

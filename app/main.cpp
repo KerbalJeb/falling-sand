@@ -15,9 +15,6 @@
 const int width = 640, height = 320;
 
 int main() {
-  if (!glfwInit()) {
-    std::exit(EXIT_FAILURE);
-  }
   auto app = application::init(ROOT_DIR"/resources/shaders/sprite2d.vert",
                                ROOT_DIR"/resources/shaders/sprite2d.frag",
                                width * 2,
