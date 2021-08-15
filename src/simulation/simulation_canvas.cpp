@@ -23,8 +23,8 @@ simulation_canvas::simulation_canvas(int width, int height)
 void simulation_canvas::step_forward() {
   evenFrame = !evenFrame;
 
-  for (int y = 1; y <= height(); ++y) {
-    for (int x = 1; x <= width(); ++x) {
+  for (int y = 1; y < height_ - 1; ++y) {
+    for (int x = 1; x < width_ - 1; ++x) {
       auto &p = get_particle(x, y);
       assert(p.id < em.size());
       if (!p.id || p.lastUpdated == evenFrame) { continue; }
@@ -116,8 +116,8 @@ void simulation_canvas::write_to_img(image &img) {
   assert(img.width() == width());
 
   auto img_it = img.img_ptr();
-  for (int y = 0; y < height(); ++y) {
-    for (int x = 0; x < width(); ++x) {
+  for (int y = 1; y < height_ - 1; ++y) {
+    for (int x = 1; x < width_ - 1; ++x) {
       const auto &p = get_particle(x, y);
       img_it[0] = p.r;
       img_it[1] = p.g;
@@ -142,7 +142,7 @@ bool simulation_canvas::in_canvas(int x, int y) const {
 }
 
 bool simulation_canvas::on_floor(int y) const {
-  return y == height_ - 1;
+  return y == height_ - 2;
 }
 
 bool
