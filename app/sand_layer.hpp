@@ -141,7 +141,11 @@ private:
 
   bool on_drop(drop_event &e) {
     auto &path = e.get_paths()[0];
-    canvas.load(path);
+    if (canvas.load(path)) {
+      std::cout << "Loaded Save" << std::endl;
+    } else {
+      std::cout << "Invalid Save File" << std::endl;
+    }
     return true;
   }
 };

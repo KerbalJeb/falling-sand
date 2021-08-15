@@ -228,14 +228,13 @@ bool simulation_canvas::save(const std::filesystem::path &path) const {
 
 bool simulation_canvas::load(const std::filesystem::path &path) {
   std::ifstream f{path};
-  assert(f.is_open());
   if (!f.is_open()) { return false; }
 
   int width, height;
   f >> width >> height;
-  assert(f.is_open());
-  assert(width == this->width());
-  assert(height == this->height());
+
+  if (width != this->width() || height != this->height()) { return false; }
+
   std::vector<element_id_type> ids;
   std::string line;
   std::string id_str;
@@ -258,13 +257,16 @@ bool simulation_canvas::load(const std::filesystem::path &path) {
       ids.push_back(int_id);
     }
   }
-  assert(ids.size() == width * height);
+
   if (ids.size() != width * height) { return false; }
 
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
       auto &p = get_particle(x + 1, y + 1);
       auto i = ids[y * width + x];
+      if (i >= em.size()) {
+        return false;
+      }
       p = em.get_element(i).create();
     }
   }
