@@ -1,9 +1,9 @@
-#version 330 core
-in vec2 uvCords;
-out vec4 color;
+#version 300 es
+in  mediump vec2 uvCords;
+out mediump vec4 color;
 
-uniform sampler2D image;
-uniform vec3 spriteColor;
+uniform mediump sampler2D image;
+uniform mediump vec3 spriteColor;
 
 void main() {
     color = vec4(spriteColor, 1.0) * texture(image, uvCords);

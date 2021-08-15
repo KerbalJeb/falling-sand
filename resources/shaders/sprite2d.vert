@@ -1,10 +1,10 @@
-#version 330 core
-layout (location=0) in vec4 vertex;
+#version 300 es
+in mediump vec4 vertex;
 
-out vec2 uvCords;
+out mediump vec2 uvCords;
 
-uniform mat4 model;
-uniform mat4 projection;
+uniform mediump mat4 model;
+uniform mediump mat4 projection;
 
 void main() {
     uvCords = vertex.zw;
