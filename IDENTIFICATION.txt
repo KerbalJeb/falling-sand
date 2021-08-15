@@ -1,0 +1,7 @@
+name "Ben Kellman"
+student_id "V00898289"
+email "bkellman@uvic.ca"
+term "2021-05"
+course "SENG475"
+section "T01"
+assignment "cpp_project"

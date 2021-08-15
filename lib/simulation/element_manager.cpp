@@ -3,21 +3,33 @@
 
 element_manager &element_manager::instance() {
   static element_manager instance{
-      {"empty",    movement_type::solid,  0,   0,   0,   0, {0,   0,   {}},      {}},
-      {"boundary", movement_type::solid,  0,   0,   0,   0, {0,   0,   {}},      {}},
-      {"sand",     movement_type::powder, 194, 178, 128, 0, {0,   0,   {}},      {}},
-      {"water",    movement_type::liquid, 50,  50,  200, 0, {0,   0,   {}},      {}},
-      {"wood",     movement_type::solid,  120, 70,  30,  0, {0,   0,   {}},      {}},
-      {"lava",     movement_type::liquid, 170, 68,  0,   0, {0,   0,   {}},      {}},
-      {"oil",      movement_type::liquid, 120, 103, 33,  0, {0,   0,   {}},      {}},
-      {"wall",     movement_type::solid,  77,  77,  77,  0, {0,   0,   {}},      {}},
-      {"steam",    movement_type::gas,    42,  127, 255, 0, {200, 500, "water"}, {}},
-      {"fire",     movement_type::gas,    255, 127, 42,  0, {30,  30,  "empty"}, {
-                                                                                     {"wood", "fire", 0.1},
-                                                                                     {"water", "steam", 0.5},
-                                                                                     {"oil", "fire", 0.5},
-                                                                                 }},
+      {"empty",    movement_type::solid,  0,   0,   0,   0,    {0,   0,   {}},      {}},
+      {"boundary", movement_type::solid,  0,   0,   0,   0,    {0,   0,   {}},      {}},
+      {"sand",     movement_type::powder, 194, 178, 128, 0.2,  {0,   0,   {}},      {}},
+      {"oil",      movement_type::liquid, 120, 103, 33,  0.01, {0,   0,   {}},      {}},
+      {"wall",     movement_type::solid,  77,  77,  77,  0,    {0,   0,   {}},      {}},
+      {"lava",     movement_type::liquid, 170, 68,  0,   0.5,  {0,   0,   {}},      {
+                                                                                        {"water", "steam", 0.8},
+                                                                                        {"wood",  "fire",  0.05},
+                                                                                        {"oil", "fire", 0.75},
+                                                                                    }},
+      {"steam",    movement_type::gas,    42,  127, 255, 0.1,  {200, 100, "water"}, {
+                                                                                        {"fire",  "empty", 0.15},
 
+                                                                                    }},
+      {"water",    movement_type::liquid, 50,  50,  200, 0.2,  {0,   0,   {}},      {
+                                                                                        {"fire",  "empty", 0.75},
+                                                                                        {"lava",  "sand",  0.1},
+                                                                                    }},
+      {"wood",     movement_type::solid,  120, 70,  30,  0.1,  {0,   0,   {}},      {
+                                                                                        {"water", "wood",  0.01},
+                                                                                    }},
+      {"fire",     movement_type::gas,    255, 127, 42,  0.5,  {30,  30,  "empty"}, {
+                                                                                        {"wood",  "fire",  0.1},
+                                                                                        {"water", "steam", 0.5},
+                                                                                        {"oil", "fire", 0.5},
+                                                                                        {"sand", "lava", 0.005},
+                                                                                    }},
   };
   return instance;
 }
@@ -31,6 +43,9 @@ element_manager::element_manager(const std::initializer_list<element_initializer
     allElements_.emplace_back(elem, idx);
     ++idx;
   }
+
+  assert(get_idx("empty") == 0);
+  boarderId_ = get_idx("boundary");
 
   // A bit inefficient, but it only happens once
   for (const auto &elem:init) {
@@ -57,9 +72,10 @@ element_manager::element_manager(const std::initializer_list<element_initializer
     }
   }
 
-  for (int i = 0; i < allElements_.size(); ++i) {
+  std::size_t n = allElements_.size();
+  for (int i = 0; i < n; ++i) {
     displacementRules_.emplace_back(size(), false);
-    for (int j = 0; j < allElements_.size(); ++j) {
+    for (int j = 0; j < n; ++j) {
       auto &e1 = get_element(i);
       auto &e2 = get_element(j);
       if (e2.type == 0) {
@@ -74,6 +90,10 @@ element_manager::element_manager(const std::initializer_list<element_initializer
       }
     }
   }
+
+  // Just hard coding this for now, could add a density property later
+  auto water_id = get_idx("water"), oil_id = get_idx("oil");
+  displacementRules_[water_id][oil_id] = true;
 }
 
 std::size_t element_manager::get_idx(const std::string &name) const {
@@ -81,10 +101,6 @@ std::size_t element_manager::get_idx(const std::string &name) const {
                          [&name](const auto &e) { return e.name == name; });
   assert(it != allElements_.end());
   return it - allElements_.begin();
-}
-
-std::size_t element_manager::size() const {
-  return allElements_.size();
 }
 
 const element &element_manager::get_element(std::size_t idx) const {

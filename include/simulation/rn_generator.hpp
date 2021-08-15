@@ -33,7 +33,6 @@ private:
   std::vector<float> randomFloatValues_{};
   std::size_t idx_{};
   static constexpr std::size_t numValues_{250};
-  float minRealValue_;
 };
 
 #endif //CPP_FALLING_SAND_RN_GENERATOR_HPP

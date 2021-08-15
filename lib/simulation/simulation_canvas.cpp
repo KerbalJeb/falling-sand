@@ -71,6 +71,7 @@ void simulation_canvas::step_forward() {
 
       particle_instance *lastValid{nullptr};
       int i = p.id;
+      // todo: improve rules to particle can move if only blocked in one direction
       bool finished =
           for_each_in_line(x, y, p.vx, p.vy, [&lastValid, this, i](int x, int y) {
             auto &p1 = get_particle(x, y);
@@ -196,9 +197,10 @@ void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const el
 }
 
 void simulation_canvas::move_gas(int x, int y, particle_instance &p, const element &e) {
+  // todo: add slight bias towards upwards velocity
   int speed = 6;
   int vx = static_cast<int>(rn_gen.random_int(speed)) - speed / 2;
-  int vy = static_cast<int>(rn_gen.random_int(speed)) - speed / 2;
+  int vy = static_cast<int>(rn_gen.random_int(speed)) - speed / 2 - 1;
   p.vy = vy;
   p.vx = vx;
 }

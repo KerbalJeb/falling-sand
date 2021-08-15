@@ -6,10 +6,14 @@ rng &rng::instance() {
 }
 
 bool rng::random_chance(float prob) {
+  // Save a bit of work and return false if prob is zero
   if (prob == 0) { return false; }
+  // Precomputed values won't work well for small probabilities
+  if (prob < 0.05) { return real_(rd_) < prob; }
+  // Use the precomputed values to speed things up a bit
   ++idx_;
   idx_ %= numValues_;
-  return rand_float() < (prob + minRealValue_);
+  return rand_float() < prob;
 }
 
 rng::rng() {
@@ -20,7 +24,7 @@ rng::rng() {
     randomValues_.push_back(randInt_());
     randomFloatValues_.push_back(real_(rd_));
   }
-  minRealValue_ = *std::min_element(randomFloatValues_.begin(), randomFloatValues_.end());
+  *std::min_element(randomFloatValues_.begin(), randomFloatValues_.end());
 }
 
 std::uint32_t rng::random_int(int max) {

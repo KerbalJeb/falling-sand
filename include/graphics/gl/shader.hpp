@@ -12,10 +12,7 @@
 
 class shader {
 public:
-  class path {
-  };
-
-  shader(const path &, const std::string &path, GLenum shaderType) {
+  shader(const std::filesystem::path &path, GLenum shaderType) {
     obj_ = glCreateShader(shaderType);
     if (!obj_) {
       throw std::runtime_error{"Unable to create shader"};
@@ -82,8 +79,8 @@ public:
   shader_program(const std::string &vertexPath,
                  const std::string &fragmentPath) {
     // Create Shaders
-    shader vertexShader{shader::path{}, vertexPath, GL_VERTEX_SHADER};
-    shader fragmentShader{shader::path{}, fragmentPath, GL_FRAGMENT_SHADER};
+    shader vertexShader{vertexPath, GL_VERTEX_SHADER};
+    shader fragmentShader{fragmentPath, GL_FRAGMENT_SHADER};
 
     obj_ = glCreateProgram();
     if (!obj_) {

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.18)
 project(cpp_falling_sand)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -9,6 +9,8 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 find_package(Catch2 REQUIRED)
+
+add_compile_definitions(ROOT_DIR="./")
 
 add_subdirectory(external)
 
@@ -26,6 +28,11 @@ target_include_directories(cpp_falling_sand PRIVATE include app)
 add_executable(test_util test/test_util.cpp)
 target_link_libraries(test_util Catch2::Catch2 stb_image)
 target_include_directories(test_util PRIVATE include)
+
+install(TARGETS cpp_falling_sand DESTINATION bin)
+
+install(PROGRAMS demo DESTINATION bin)
+install(DIRECTORY resources DESTINATION resources)
 
 add_custom_command(TARGET cpp_falling_sand POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

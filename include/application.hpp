@@ -17,9 +17,11 @@
 class application {
 public:
   template<class... Args>
-  static application *init(Args &&... args) {
+  static application *
+  init(const std::filesystem::path &vertex_path, const std::filesystem::path &fragment_path, Args &&... args) {
+
     if (instance_ == nullptr) {
-      instance_ = new application(args...);
+      instance_ = new application(vertex_path, fragment_path, args...);
     }
     return instance_;
   }
@@ -68,12 +70,13 @@ public:
 
 private:
   template<class... Args>
-  explicit application(Args... args)
+  explicit
+  application(const std::filesystem::path &vertex_path, const std::filesystem::path &fragment_path, Args... args)
       : window_(args...,
                 [this](auto &&e) { on_event(std::forward<decltype(e)>(e)); }) {
     shader_ = std::make_shared<shader_program>(
-        "resources/shaders/sprite2d.vert",
-        "resources/shaders/sprite2d.frag");
+        vertex_path,
+        fragment_path);
     spriteRender_ = std::make_shared<sprite_render>(shader_,
                                                     window_.width(),
                                                     window_.height());

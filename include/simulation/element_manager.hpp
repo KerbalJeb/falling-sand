@@ -36,7 +36,11 @@ public:
 
   [[nodiscard]] std::size_t get_idx(const std::string &name) const;
 
-  [[nodiscard]] std::size_t size() const;
+  [[nodiscard]] std::size_t size() const { return allElements_.size(); }
+
+  [[nodiscard]] std::size_t empty() const { return 0; }
+
+  [[nodiscard]] std::size_t boarder() const { return boarderId_; }
 
   [[nodiscard]] const element &get_element(std::size_t idx) const;
 
@@ -56,6 +60,7 @@ private:
   std::vector<std::vector<bool>> displacementRules_;
   std::vector<contact_rule> contactRules_;
   std::vector<lifetime_rule> lifetimeRules_;
+  element_id_type boarderId_;
 };
 
 #endif //CPP_FALLING_SAND_ELEMENT_MANAGER_HPP
