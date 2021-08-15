@@ -46,6 +46,7 @@ struct element_initializer {
   float color_variation;
   lifetime lifetime_rule{};
   std::initializer_list<contact_rule> contact_rules{};
+  std::uint32_t opt_param{0};
 };
 
 // A class the represents one element type
@@ -67,8 +68,9 @@ public:
   std::string name;
   std::uint8_t red, green, blue;
   movement_type movement;
-  bool randomizeColor;
-  float colorVar{};
+  bool randomize_color;
+  float color_var{};
+  std::uint32_t opt_param{0};
 
 private:
   void randomize(particle_instance &p) const;

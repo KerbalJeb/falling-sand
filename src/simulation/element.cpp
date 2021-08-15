@@ -3,12 +3,12 @@
 
 particle_instance element::create() const {
   auto p = particle_instance{type, 0, 0, 0, red, green, blue};
-  if (randomizeColor) { randomize(p); }
+  if (randomize_color) { randomize(p); }
   return p;
 }
 
 void element::randomize(particle_instance &p) const {
-  auto scale = 1 - colorVar * rng::instance().rand_float();
+  auto scale = 1 - color_var * rng::instance().rand_float();
   p.r = static_cast<std::uint8_t>(scale * p.r);
   p.g = static_cast<std::uint8_t>(scale * p.g);
   p.b = static_cast<std::uint8_t>(scale * p.b);
@@ -21,6 +21,7 @@ element::element(const element_initializer &init, element_id_type id) {
   green = init.green;
   blue = init.blue;
   movement = init.movement;
-  randomizeColor = init.color_variation > 0;
-  colorVar = init.color_variation;
+  randomize_color = init.color_variation > 0;
+  color_var = init.color_variation;
+  opt_param = init.opt_param;
 }

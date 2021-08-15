@@ -57,10 +57,10 @@ void simulation_canvas::step_forward() {
         case movement_type::solid:
           break;
         case movement_type::liquid:
-          move_liquid(x, y, p, e);
+          move_liquid(x, y);
           break;
         case movement_type::gas:
-          move_gas(x, y, p, e);
+          move_gas(x, y);
           break;
       }
 
@@ -155,9 +155,10 @@ simulation_canvas::move_powder(int x, int y, particle_instance &p,
   return false;
 }
 
-void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const element &e) {
-  // todo: improve liquid movement rules
+void simulation_canvas::move_liquid(int x, int y) {
   auto &below = get_particle(x, y + 1);
+  auto &p = get_particle(x, y);
+  auto &e = elementManager_.get_element(p.id);
   if (elementManager_.get_displacement_rule(p.id, below.id)) {
     p.vy += gravity_accel;
     p.vx = 0;
@@ -176,17 +177,38 @@ void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const el
     return;
   }
 
-  auto &horizontalNeighbour1 = get_particle(x + dir, y);
-  auto &horizontalNeighbour2 = get_particle(x - dir, y);
-  int spread = 5;
-  if (!horizontalNeighbour2.id) { p.vx = -spread * dir; }
+  int spread = e.opt_param;
+
+  int xMin = x, xMax = x;
+
+  while (xMin >= std::max(0, x - spread)) {
+    auto &pNext = get_particle(xMin - 1, y);
+    if (!elementManager_.get_displacement_rule(p.id, pNext.id)) { break; }
+    --xMin;
+  }
+
+  while (xMax < std::min(width(), x + spread + 1)) {
+    auto &pNext = get_particle(xMin + 1, y);
+    if (!elementManager_.get_displacement_rule(p.id, pNext.id)) { break; }
+    ++xMax;
+  }
+
+  for (int xNew = xMin; xNew < xMax; ++xNew) {
+    int offset = rn_gen.random_int(xMax, xNew);
+    auto &pNext = get_particle(offset, y);
+    if (elementManager_.get_displacement_rule(p.id, pNext.id)) {
+      swap_particles(p, pNext);
+      break;
+    }
+  }
 }
 
-void simulation_canvas::move_gas(int x, int y, particle_instance &p, const element &e) {
-  // todo: add slight bias towards upwards velocity
+void simulation_canvas::move_gas(int x, int y) {
+  auto &p = get_particle(x, y);
+  auto &e = elementManager_.get_element(p.id);
   int speed = 6;
-  int vx = static_cast<int>(rn_gen.random_int(speed)) - speed / 2;
-  int vy = static_cast<int>(rn_gen.random_int(speed)) - speed / 2 - 1;
+  int vx = (int) (rn_gen.random_int(speed)) - speed / 2;
+  int vy = (int) (rn_gen.random_int(speed)) - speed / 2 - (int) e.opt_param;
   p.vy = vy;
   p.vx = vx;
 }

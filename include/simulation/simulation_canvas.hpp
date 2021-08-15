@@ -88,9 +88,9 @@ private:
 
   bool move_powder(int x, int y, particle_instance &p, const element &e);
 
-  void move_liquid(int x, int y, particle_instance &p, const element &e);
+  void move_liquid(int x, int y);
 
-  void move_gas(int x, int y, particle_instance &p, const element &e);
+  void move_gas(int x, int y);
 
   std::vector<particle_instance> buffer;
   int width_, height_;

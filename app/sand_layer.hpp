@@ -19,22 +19,22 @@ public:
             {"empty_id", movement_type::solid,  0,   0,   0,   0,    {0,   0,   {}},         {}},
             {"boundary", movement_type::solid,  0,   0,   0,   0,    {0,   0,   {}},         {}},
             {"sand",     movement_type::powder, 194, 178, 128, 0.2,  {0,   0,   {}},         {}},
-            {"oil",      movement_type::liquid, 120, 103, 33,  0.01, {0,   0,   {}},         {}},
+            {"oil",      movement_type::liquid, 120, 103, 33,  0.01, {0,   0,   {}},         {}, 8},
             {"wall",     movement_type::solid,  77,  77,  77,  0,    {0,   0,   {}},         {}},
             {"lava",     movement_type::liquid, 170, 68,  0,   0.5,  {0,   0,   {}},         {
                                                                                                  {"water", "steam",    0.8},
                                                                                                  {"wood",  "fire",  0.05},
                                                                                                  {"oil", "fire", 0.75},
-                                                                                             }},
+                                                                                             },  1},
 
             {"steam",    movement_type::gas,    42,  127, 255, 0.1,  {200, 100, "water"},    {
                                                                                                  {"fire",  "empty_id", 0.15},
-                                                                                             }},
+                                                                                             },  2},
 
             {"water",    movement_type::liquid, 50,  50,  200, 0.2,  {0,   0,   {}},         {
                                                                                                  {"fire",  "empty_id", 0.75},
                                                                                                  {"lava",  "sand",  0.1},
-                                                                                             }},
+                                                                                             },  5},
 
             {"wood",     movement_type::solid,  120, 70,  30,  0.1,  {0,   0,   {}},         {
                                                                                                  {"water", "wood",     0.01},
