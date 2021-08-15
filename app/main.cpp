@@ -22,9 +22,9 @@ int main() {
                                ROOT_DIR"/resources/shaders/sprite2d.frag",
                                width * 2,
                                height * 2 + 100,
-                               "My Demo",
+                               "Falling Sand",
                                GL_FALSE,
-                               "resources/icon.png");
+                               ROOT_DIR"/resources/icon.png");
   sand_layer sandLayer{width, height, 2, application::basic_render()};
   std::vector<ui_button> buttons{
       {ROOT_DIR"/resources/sand-button.png",  10,  650, 25, 75, [&sandLayer]() {

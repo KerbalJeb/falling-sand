@@ -10,8 +10,6 @@ find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 find_package(Catch2 REQUIRED)
 
-add_compile_definitions(ROOT_DIR="./")
-
 add_subdirectory(external)
 
 add_executable(cpp_falling_sand app/main.cpp
@@ -24,6 +22,7 @@ add_executable(cpp_falling_sand app/main.cpp
 
 target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm::glm stb_image)
 target_include_directories(cpp_falling_sand PRIVATE include app)
+target_compile_definitions(cpp_falling_sand PRIVATE ROOT_DIR="${CMAKE_INSTALL_PREFIX}")
 
 add_executable(test_util test/test_util.cpp)
 target_link_libraries(test_util Catch2::Catch2 stb_image)
@@ -32,9 +31,4 @@ target_include_directories(test_util PRIVATE include)
 install(TARGETS cpp_falling_sand DESTINATION bin)
 
 install(PROGRAMS demo DESTINATION bin)
-install(DIRECTORY resources DESTINATION resources)
-
-add_custom_command(TARGET cpp_falling_sand POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/resources ${CMAKE_BINARY_DIR}/resources
-        )
+install(DIRECTORY resources DESTINATION ${CMAKE_INSTALL_PREFIX})
