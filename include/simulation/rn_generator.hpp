@@ -8,6 +8,9 @@
 #include <random>
 #include <vector>
 
+// A global random number generator
+// Precaches random values to improve speed
+// since there are a large number of random numbers need per frame
 class rng {
 public:
 
@@ -15,12 +18,16 @@ public:
 
   rng(rng &&) = delete;
 
-  bool random_chance(float prob);
+  // returns true p percent of the time
+  // p must be between 0 and 1
+  bool random_chance(float p);
 
+  // Get a random int between 0 and max
   std::uint32_t random_int(int max);
 
   static rng &instance();
 
+  // Get a random float between 0 and 1
   float rand_float();
 
 private:

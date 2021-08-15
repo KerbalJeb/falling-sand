@@ -5,15 +5,15 @@ rng &rng::instance() {
   return instance;
 }
 
-bool rng::random_chance(float prob) {
-  // Save a bit of work and return false if prob is zero
-  if (prob == 0) { return false; }
+bool rng::random_chance(float p) {
+  // Save a bit of work and return false if p is zero
+  if (p == 0) { return false; }
   // Precomputed values won't work well for small probabilities
-  if (prob < 0.05) { return real_(rd_) < prob; }
+  if (p < 0.05) { return real_(rd_) < p; }
   // Use the precomputed values to speed things up a bit
   ++idx_;
   idx_ %= numValues_;
-  return rand_float() < prob;
+  return rand_float() < p;
 }
 
 rng::rng() {

@@ -9,68 +9,48 @@
 #include <iostream>
 #include <GL/glew.h>
 
+// A wrapper class for a 2d opengl texture
 class texture2d {
 public:
+  // Creates a opengl texture of size width by height using the provided pixel data
+  // The memory block pointed to by pixel_data large enough to contain all pixel data (width*height*pixelSize)
+  // minMagFilter is the filter type to use when magnifying or minifying the texture, defaults to neares
+  // format is the format of the image, defaults to RGB
   texture2d(std::size_t width, std::size_t height, const void *pixel_data,
-            GLenum format = GL_RGB, GLint minMagFilter = GL_NEAREST)
-      : width_(width), height_(height) {
-    glGenTextures(1, &obj_);
-    bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            GLenum format = GL_RGB, GLint minMagFilter = GL_NEAREST);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minMagFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, minMagFilter);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format,
-                 GL_UNSIGNED_BYTE, pixel_data);
-  }
-
+  // The texture is a GPU object, so it cannot easily be copied
   texture2d(const texture2d &) = delete;
 
   texture2d &operator=(const texture2d &) = delete;
 
-  texture2d(texture2d &&other) : obj_(other.obj_), width_(other.width_),
-                                 height_(other.height_) {
-    other.obj_ = 0;
-    other.height_ = 0;
-    other.width_ = 0;
-  }
+  // A texture is moved by swapping the internal object ids
+  texture2d(texture2d &&other) noexcept;
 
-  texture2d &operator=(texture2d &&other) {
-    if (this != &other) {
-      release();
-      std::swap(obj_, other.obj_);
-      std::swap(height_, other.height_);
-      std::swap(width_, other.width_);
-    }
-    return *this;
-  }
+  texture2d &operator=(texture2d &&other);
 
+  // Delete the opengl texture on destruction
   ~texture2d() { release(); }
 
-    void update(const void *new_data) {
-        bind();
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, new_data);
-    }
+  // Update the texture with new data
+  // new_data must point to a region of memory at least a big as the texture size (width*height*pixelSize)
+  void update(const void *new_data);
 
-    void bind() {
-        glBindTexture(GL_TEXTURE_2D, obj_);
-    }
+  // Bind the texture
+  void bind() { glBindTexture(GL_TEXTURE_2D, obj_); }
 
-    void unbind() {
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+  // Unbind the texture
+  void unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
 private:
-    std::size_t width_;
-    std::size_t height_;
-    GLuint obj_{0};
+  std::size_t width_;
+  std::size_t height_;
+  GLuint obj_{0};
 
-    void release() {
-        glDeleteTextures(1, &obj_);
-        obj_ = 0;
-    }
+  void release() {
+    glDeleteTextures(1, &obj_);
+    obj_ = 0;
+  }
 };
 
 #endif //CPP_FALLING_SAND_TEXTURE2D_HPP

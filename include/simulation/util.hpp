@@ -8,8 +8,8 @@
 #include <random>
 #include <simulation/simulation_canvas.hpp>
 
-constexpr std::int16_t gravity_accel = 2;
-
+// Executes f for each point on the line starting a (x,y)
+// and ending at (x+dx,y+dy) or when func returns true
 template<class F>
 bool for_each_in_line(int x, int y, int dx, int dy, F func) {
   int xi = 1 - 2 * std::signbit(dx);
@@ -42,24 +42,6 @@ bool for_each_in_line(int x, int y, int dx, int dy, F func) {
     if (done) { return false; }
   }
   return true;
-}
-
-template<class UnaryPredicate>
-particle_instance &
-find_in_line(simulation_canvas &canvas, int x0, int x1, int y0, int y1,
-             UnaryPredicate p) {
-  assert(x0 == x1);
-  assert(y1 >= y0);
-  auto pl = &canvas.get_particle(x0, y0);
-  for (int y = y0 + 1; y <= y1; ++y) {
-    if (!canvas.in_canvas(x0, y)) { return *pl; }
-    auto &pi = canvas.get_particle(x0, y);
-    if (!p(pi)) {
-      return *pl;
-    }
-    pl = &pi;
-  }
-  return *pl;
 }
 
 #endif //CPP_FALLING_SAND_UTIL_HPP

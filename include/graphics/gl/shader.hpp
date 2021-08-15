@@ -5,65 +5,40 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// A wrapper class for opengl shader objects
 class shader {
 public:
-  shader(const std::filesystem::path &path, GLenum shaderType) {
-    obj_ = glCreateShader(shaderType);
-    if (!obj_) {
-      throw std::runtime_error{"Unable to create shader"};
-    }
+  // Constructs a shader type shaderType from the source file
+  // src_path must be the path of a valid shader file
+  // A runtime exception will be thrown if the src_path does not exists
+  // or the shader fails to complies
+  // In the event of a compilation error,
+  // the full opengl error message will be printed to the console
+  shader(const std::filesystem::path &src_path, GLenum shaderType);
 
-    std::basic_ifstream<GLchar> f{path};
-    std::basic_string<GLchar> shaderSource{
-        (std::istreambuf_iterator<GLchar>{f}),
-        (std::istreambuf_iterator<GLchar>{})
-    };
-    const GLchar *sourceStart = &shaderSource[0];
-    auto len = static_cast<GLint>(shaderSource.size());
-
-    glShaderSource(obj_, 1, &sourceStart, &len);
-    glCompileShader(obj_);
-
-    GLint status = GL_FALSE;
-    glGetShaderiv(obj_, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-      char msg_buffer[512];
-      glGetShaderInfoLog(obj_, 512, nullptr, msg_buffer);
-      glDeleteShader(obj_);
-      std::cout << "Error compiling shader:" << std::endl << msg_buffer
-                << std::endl;
-      throw std::runtime_error{"Unable to compile shader"};
-    }
-  }
-
+  // Shaders live on the GPU so the cannot (easily) be copied
   shader(const shader &) = delete;
 
   shader &operator=(const shader &) = delete;
 
+  // Shaders can be moved by swapping the stored object ids
   shader(shader &&other) noexcept: obj_(other.obj_) {
     other.obj_ = 0;
   }
 
-  shader &operator=(shader &&other) noexcept {
-    if (this != &other) {
-      release();
-      std::swap(obj_, other.obj_);
-    }
-    return *this;
-  }
+  shader &operator=(shader &&other) noexcept;
 
-  ~shader() {
-    release();
-  }
+  // Delete the shader on destruction
+  ~shader() { release(); }
 
-  void attach(GLuint program) const {
-    glAttachShader(program, obj_);
-  };
+  // Calls glAttachShader for the given program
+  void attach(GLuint program) const { glAttachShader(program, obj_); };
 
 private:
   GLuint obj_{0};
@@ -74,85 +49,55 @@ private:
   }
 };
 
+// A wrapper class for opengl shader programs
 class shader_program {
 public:
+  // Generates a shader program from a vertex and fragment shader
+  // both paths must be the paths of valid shader files
+  // A runtime exception will be thrown if either of the files does not exists
+  // or the shaders fail to compile
+  // In the event of a compilation error,
+  // the full opengl error message will be printed to the console
   shader_program(const std::string &vertexPath,
-                 const std::string &fragmentPath) {
-    // Create Shaders
-    shader vertexShader{vertexPath, GL_VERTEX_SHADER};
-    shader fragmentShader{fragmentPath, GL_FRAGMENT_SHADER};
+                 const std::string &fragmentPath);
 
-    obj_ = glCreateProgram();
-    if (!obj_) {
-      throw std::runtime_error{"Unable to create shader program"};
-    }
-
-    vertexShader.attach(obj_);
-    fragmentShader.attach(obj_);
-
-    glLinkProgram(obj_);
-    GLint status = GL_FALSE;
-    glGetProgramiv(obj_, GL_LINK_STATUS, &status);
-
-    if (status != GL_TRUE) {
-      char infoLog[512];
-      glGetProgramInfoLog(obj_, 512, nullptr, infoLog);
-      glDeleteProgram(obj_);
-      std::cout << "Link failed" << std::endl << infoLog << std::endl;
-      throw std::runtime_error{"Unable to link shader program"};
-    }
-  }
-
+  // Shader objects cannot be copied
   shader_program(const shader_program &) = delete;
 
   shader_program &operator=(const shader_program &) = delete;
 
-  shader_program(shader_program &&other) noexcept: obj_(other.obj_) {
-    other.obj_ = 0;
-  }
+  // Shader objects can be moved by swapping object ids
+  shader_program(shader_program &&other) noexcept: obj_(other.obj_) { other.obj_ = 0; }
 
-  shader_program &operator=(shader_program &&other) noexcept {
-    if (this != &other) {
-      release();
-      std::swap(obj_, other.obj_);
-    }
-    return *this;
-  }
+  shader_program &operator=(shader_program &&other) noexcept;
 
-  ~shader_program() {
-    release();
-  }
+  // Destroy the opengl shader object on destruction
+  ~shader_program() { release(); }
 
+  // Call glUseProgram for the current program
   void bind() const {
     glUseProgram(obj_);
   }
 
+  // Return the value of get_attrib_location for the program
   [[nodiscard]] GLint get_attrib_location(const std::string &name) const {
     return glGetAttribLocation(obj_, name.c_str());
   }
 
+  // Return the value of get_uniform_location for the program
   [[nodiscard]] GLint get_uniform_location(const std::string &name) const {
     return glGetUniformLocation(obj_, name.c_str());
   }
 
-  void set_uniform3f(const std::string &name, const glm::vec3 &vec3) {
-    auto pos = get_uniform_location(name);
+  // Calls set_uniform3f with the program
+  void set_uniform3f(const std::string &uniform_name, const glm::vec3 &vec3) {
+    auto pos = get_uniform_location(uniform_name);
     glUniform3f(pos, vec3.x, vec3.y, vec3.z);
   }
 
-  void set_uniform4f(const std::string &name, const glm::vec4 &vec4) {
-    auto pos = get_uniform_location(name);
-    glUniform4f(pos, vec4.x, vec4.y, vec4.z, vec4.w);
-  }
-
-  void set_uniform4f(const std::string &name, float r, float g, float b,
-                     float a) const {
-    auto pos = get_uniform_location(name);
-    glUniform4f(pos, r, g, b, a);
-  }
-
-  void set_uniform_mat4(const std::string &name, const glm::mat4 &mat) {
-    auto pos = get_uniform_location(name);
+  // Calls set_uniform_mat4 with the program
+  void set_uniform_mat4(const std::string &uniform_name, const glm::mat4 &mat) {
+    auto pos = get_uniform_location(uniform_name);
     glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(mat));
   }
 

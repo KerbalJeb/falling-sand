@@ -23,39 +23,46 @@ public:
     element_id_type transform_element{0};
   };
 
-  element_manager() = delete;
+  // Creates an element manager with the given elements
+  // First entry must be the empty element
+  // The list must also contain one solid element with the name 'boundary'
+  element_manager(const std::initializer_list<element_initializer> &elements);
 
   element_manager(const element_manager &) = delete;
 
-  element_manager(element_manager &&) = delete;
+  element_manager(element_manager &&) = default;
 
-  static element_manager &instance();
+  // Get the id of an element from its string name
+  [[nodiscard]] std::size_t find_id(const std::string &name) const;
 
-  [[nodiscard]] const std::vector<element> &
-  elements() const { return allElements_; }
-
-  [[nodiscard]] std::size_t get_idx(const std::string &name) const;
-
+  // The total number of elements
   [[nodiscard]] std::size_t size() const { return allElements_.size(); }
 
-  [[nodiscard]] std::size_t empty() const { return 0; }
+  // The id of the empty element
+  [[nodiscard]] std::size_t empty_id() const { return 0; }
 
-  [[nodiscard]] std::size_t boarder() const { return boarderId_; }
+  // The id of the boundary element
+  [[nodiscard]] std::size_t boundary_id() const { return boarderId_; }
 
-  [[nodiscard]] const element &get_element(std::size_t idx) const;
+  // Get the element with the given id
+  [[nodiscard]] const element &get_element(std::size_t id) const;
 
+  // Check if primary can displays secondary
   [[nodiscard]] bool
-  get_displacement_rule(element_id_type p, element_id_type s) const { return displacementRules_[p][s]; }
+  get_displacement_rule(element_id_type primary,
+                        element_id_type secondary) const { return displacementRules_[primary][secondary]; }
 
+  // Get the life time rule for p
   [[nodiscard]] const lifetime_rule &
   get_lifetime_rule(element_id_type p) const { return lifetimeRules_[p]; }
 
+  // Get the contact rules for primary and secondary
   [[nodiscard]] const contact_rule &
-  get_contact_rule(element_id_type p, element_id_type s) const { return contactRules_[p * size() + s]; }
+  get_contact_rule(element_id_type primary, element_id_type secondary) const {
+    return contactRules_[primary * size() + secondary];
+  }
 
 private:
-  element_manager(const std::initializer_list<element_initializer> &init);
-
   std::vector<element> allElements_;
   std::vector<std::vector<bool>> displacementRules_;
   std::vector<contact_rule> contactRules_;

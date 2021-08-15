@@ -9,34 +9,31 @@
 #include <functional>
 #include <graphics/sprite.hpp>
 #include <graphics/image.hpp>
-#include <events/event.hpp>
 #include <utility>
+#include <events/mouse_events.hpp>
 
+// A basic UI button class
 class ui_button {
 public:
   using action = std::function<void()>;
 
+  // Creates a button of width and height with an upper left corner at xPos,yPos
+  // Renders the button using the img loaded from img_path (must be a valid image)
+  // When clicked, the action function a will be called
   ui_button(const std::filesystem::path &img_path, int xPos, int yPos,
-            int width, int height, action a) : onPressed_(std::move(a)) {
-    image img{img_path};
-    texture_ = img.create_shared_texture();
-    sprite_.texture = texture_.get();
-    sprite_.scale = glm::vec2(height, width);
-    sprite_.pos = glm::vec2(xPos, yPos);
-  }
+            int width, int height, action a);
 
   ui_button(const ui_button &) = default;
 
   ui_button(ui_button &&) = default;
 
+  // Return a const reference to the get_sprite used for this button
   [[nodiscard]] const sprite &get_sprite() const { return sprite_; }
 
-  bool on_event(event &e) {
-    return dispatch_event<mouse_press_event>(e, [this](auto &&e) {
-      return on_mouse_press(std::forward<decltype(e)>(e));
-    });
-  }
+  // Should be called every time an event is received
+  bool on_event(event &e);
 
+  // Sets the button sprites color to newColor
   void set_color(const glm::vec3 &newColor) {
     sprite_.color = newColor;
   }
@@ -46,23 +43,9 @@ private:
   std::shared_ptr<texture2d> texture_;
   action onPressed_;
 
-  bool on_mouse_press(mouse_press_event &e) {
-    double x, y;
-    input::get_cursor(&x, &y);
-    if (e.button_id() == GLFW_MOUSE_BUTTON_LEFT && in_button(x, y)) {
-      onPressed_();
-      e.handled = true;
-      return true;
-    }
-    return false;
-  }
+  bool on_mouse_press(mouse_press_event &e);
 
-  [[nodiscard]] bool in_button(float x, float y) const {
-    float x0 = sprite_.pos.x, x1 = sprite_.pos.x + sprite_.scale.x;
-    float y0 = sprite_.pos.y, y1 = sprite_.pos.y + sprite_.scale.y;
-
-    return x >= x0 && x <= x1 && y >= y0 && y <= y1;
-  }
+  [[nodiscard]] bool in_button(float x, float y) const;
 };
 
 #endif //CPP_FALLING_SAND_UI_BUTTON_HPP

@@ -5,17 +5,23 @@
 #ifndef CPP_FALLING_SAND_APPLICATION_HPP
 #define CPP_FALLING_SAND_APPLICATION_HPP
 
+#include <ranges>
 #include <window.hpp>
 #include <events/event.hpp>
-#include <events/application_event.hpp>
+#include <events/application_events.hpp>
 #include <layer.hpp>
 #include <memory>
 
 #include <functional>
 #include <graphics/sprite_render.hpp>
 
+// A singleton class used to manage the running application
+// Handles initialization and events
 class application {
 public:
+  // Initialize the application
+  // Provide a path to the vertex and fragment shaders to use in the sprite render
+  // Along with the arguments to pass to the window constructor
   template<class... Args>
   static application *
   init(const std::filesystem::path &vertex_path, const std::filesystem::path &fragment_path, Args &&... args) {
@@ -37,40 +43,24 @@ public:
     delete instance_;
   }
 
-  void on_event(event &e) {
-    dispatch_event<window_close_event>(e, [this](auto &&e) {
-      return on_window_close(std::forward<decltype(e)>(e));
-    });
-    for (auto it = layers_.rbegin(); it != layers_.rend(); ++it) {
-      if (e.handled) { break; }
-      (*it)->on_event(e);
-    }
-  }
+  // Generates the event passed to it by passing it along to all layers in the application
+  void generate_event(event &e);
 
-  void run() {
-    running_ = true;
-    while (running_) {
-      for (auto l : layers_) {
-        l->on_update();
-      }
-      window_.update();
-    }
-  }
+  // Start running the application
+  void run();
 
+  // Stop the application
   void close() { running_ = false; }
 
   void push_layer(layer *l) { layers_.push_back(l); }
 
-  [[nodiscard]] static int window_width() { return instance_->window_.width(); }
+  // Get the window used by the application
+  window &get_window() { return window_; }
 
-  [[nodiscard]] static int
-  window_height() { return instance_->window_.height(); }
-
-
-  window *get_window() { return &(window_); }
-
+  // The singleton instance
   static application *instance() { return instance_; }
 
+  // The sprite render
   static std::shared_ptr<sprite_render>
   basic_render() { return instance_->spriteRender_; }
 
@@ -80,7 +70,7 @@ private:
   explicit
   application(const std::filesystem::path &vertex_path, const std::filesystem::path &fragment_path, Args... args)
       : window_(args...,
-                [this](auto &&e) { on_event(std::forward<decltype(e)>(e)); }) {
+                [this](auto &&e) { generate_event(std::forward<decltype(e)>(e)); }) {
     shader_ = std::make_shared<shader_program>(
         vertex_path,
         fragment_path);

@@ -4,7 +4,7 @@
 #ifndef CPP_FALLING_SAND_WINDOW_HPP
 #define CPP_FALLING_SAND_WINDOW_HPP
 
-#include <events/application_event.hpp>
+#include <events/application_events.hpp>
 #include <events/mouse_events.hpp>
 #include <events/key_events.hpp>
 #include <events/drop_event.hpp>
@@ -19,108 +19,45 @@
 #include <vector>
 #include <cassert>
 
+// A wrapper class for GLFW windows
 class window {
 public:
   using event_handler_func = std::function<void(event &)>;
 
+  // Create window of size width x height pixels
+  // Window can be resized if resizable is true
+  // The event handler function is call everytime a window event is generate (ex. input)
   window(int width, int height, const std::string &title, GLboolean resizable,
-         const event_handler_func &handler)
-      : title_(title),
-        width_(width),
-        height_(height) {
+         const event_handler_func &handler);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_RESIZABLE, resizable);
-    window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-
-    if (window_ == nullptr) {
-      glfwTerminate();
-      std::cout << "Failed to create window" << std::endl;
-      std::exit(EXIT_FAILURE);
-    }
-
-    glfwSetWindowUserPointer(window_, &data_);
-    glfwMakeContextCurrent(window_);
-    glewExperimental = GL_TRUE;
-
-    if (glewInit() != GLEW_OK) {
-      glfwTerminate();
-      std::cout << "glewInit failed" << std::endl;
-      std::exit(EXIT_FAILURE);
-    }
-
-    set_handler(handler);
-
-    glfwSetWindowCloseCallback(window_, [](GLFWwindow *window) {
-      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(window));
-      window_close_event e;
-      data->event_handler(e);
-    });
-
-    glfwSetMouseButtonCallback(window_, [](auto w, int b, int a, int m) {
-      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
-      if (a == GLFW_PRESS) {
-        mouse_press_event e{b, m};
-        data->event_handler(e);
-      }
-    });
-
-    glfwSetKeyCallback(window_, [](auto w, int b, int, int a, int mods) {
-      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
-      if (a == GLFW_PRESS) {
-        key_down_event e{b, mods};
-        data->event_handler(e);
-      }
-    });
-
-    glfwSetCursorPosCallback(window_, [](auto w, double x, double y) {
-      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
-      mouse_moves_event e{static_cast<int>(x), static_cast<int>(y)};
-      data->event_handler(e);
-    });
-
-    glfwSetDropCallback(window_, [](auto w, int count, const char **paths) {
-      auto data = static_cast<window_data *>(glfwGetWindowUserPointer(w));
-      drop_event e{std::vector<std::string>{paths, paths + count}};
-      data->event_handler(e);
-    });
-  }
-
+  // Generate a window with a custom icon, loaded from iconPath
+  // iconPath must be the path of a valid image
   window(int width, int height, const std::string &title, GLboolean resizable,
          const std::filesystem::path &iconPath,
-         const event_handler_func &handler)
-      : window(width, height, title, resizable, handler) {
-    image icon{iconPath};
-    GLFWimage iconImg = icon.get_glfw_image();
-    glfwSetWindowIcon(window_, 1, &iconImg);
-  }
+         const event_handler_func &handler);
 
 
   ~window() { shut_down(); }
 
   void shut_down() { glfwDestroyWindow(window_); }
 
-  void update() {
-    glfwPollEvents();
-    glfwSwapBuffers(window_);
-  }
+  // Called every frame
+  void update();
 
-  void set_handler(const event_handler_func &f) { data_.event_handler = f; }
+  // Set the cursor to a custom image
+  void set_cursor(GLFWimage *img);
 
-  void set_cursor(GLFWimage *img) {
-    auto newCursor = glfwCreateCursor(img, img->width / 2, img->height / 2);
-    glfwSetCursor(window_, newCursor);
-    if (customCursor_ != nullptr) {
-      glfwDestroyCursor(customCursor_);
-    }
-    customCursor_ = newCursor;
-  }
+  void use_custom_cursor();
 
-  GLFWwindow *get_native() { return window_; }
+  void use_standard_cursor();
 
+  // Get a pointer to the GLFWwindow object
+  GLFWwindow *glfw_win() { return window_; }
+
+  // The window width (px)
   [[nodiscard]] std::size_t width() const { return width_; }
 
+  // The window height (px)
   [[nodiscard]] std::size_t height() const { return height_; }
 
 private:
@@ -132,6 +69,7 @@ private:
   std::size_t width_, height_;
   window_data data_;
   GLFWcursor *customCursor_{nullptr};
+  GLFWcursor *standardCursor_{glfwCreateStandardCursor(GLFW_HAND_CURSOR)};
 };
 
 

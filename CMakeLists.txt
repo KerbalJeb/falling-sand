@@ -25,9 +25,17 @@ add_executable(cpp_falling_sand app/main.cpp
         src/simulation/brushes.cpp
         src/simulation/element.cpp
         src/simulation/element_manager.cpp
-        src/simulation/element_update.cpp
         src/simulation/rn_generator.cpp
-        src/simulation/simulation_canvas.cpp)
+        src/simulation/simulation_canvas.cpp
+        src/graphics/gl/shader.cpp
+        src/graphics/gl/texture2d.cpp
+        src/graphics/gl/vertex_array.cpp
+        src/graphics/gl/vertex_buffer.cpp
+        src/graphics/image.cpp
+        src/graphics/sprite_render.cpp
+        src/input/ui_button.cpp
+        src/application.cpp
+        src/window.cpp)
 
 target_link_libraries(cpp_falling_sand glfw OpenGL::GL GLEW::GLEW glm::glm stb_image)
 target_include_directories(cpp_falling_sand PRIVATE include app)

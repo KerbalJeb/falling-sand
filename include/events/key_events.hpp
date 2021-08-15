@@ -9,12 +9,15 @@
 
 class key_down_event : public event {
 public:
+  // Takes the GLFW button ID and modifies (Shift, Alt, ect.) assosated with the event
   key_down_event(int buttonId, int modifiers) : buttonId_(buttonId),
                                                 modifiers_(modifiers) {}
 
-  int button_id() const { return buttonId_; }
+  // Returns the GLFW button ID for the event
+  [[nodiscard]] int button_id() const { return buttonId_; }
 
-  int modifiers() const { return modifiers_; }
+  // Returns the GLFW modifier mask for the event
+  [[nodiscard]] int modifiers() const { return modifiers_; }
 
   [[nodiscard]] event_type
   get_event_type() const override { return get_static_type(); }

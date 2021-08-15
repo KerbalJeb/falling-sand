@@ -2,8 +2,8 @@
 // Created by ben on 2021-07-17.
 //
 
-#ifndef CPP_FALLING_SAND_APPLICATION_EVENT_HPP
-#define CPP_FALLING_SAND_APPLICATION_EVENT_HPP
+#ifndef CPP_FALLING_SAND_APPLICATION_EVENTS_HPP
+#define CPP_FALLING_SAND_APPLICATION_EVENTS_HPP
 
 #include <events/event.hpp>
 
@@ -17,4 +17,4 @@ public:
   static event_type get_static_type() { return event_type::WindowClose; }
 };
 
-#endif //CPP_FALLING_SAND_APPLICATION_EVENT_HPP
+#endif //CPP_FALLING_SAND_APPLICATION_EVENTS_HPP

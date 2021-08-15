@@ -9,13 +9,15 @@
 
 class mouse_press_event : public event {
 public:
+  // Takes the GLFW mouse button ID and modifier mask
   explicit mouse_press_event(int button, int mods) : button_(button),
                                                      mods_(mods) {}
 
-
+  // Returns the GLFW button ID
   [[nodiscard]] int button_id() const { return button_; }
 
-  [[nodiscard]] int mods() const { return mods_; }
+  // Returns the GLFW modifier mask
+  [[nodiscard]] int modifiers() const { return mods_; }
 
   [[nodiscard]] event_type
   get_event_type() const override { return get_static_type(); }

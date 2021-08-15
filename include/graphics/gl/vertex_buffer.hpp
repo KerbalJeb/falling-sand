@@ -1,7 +1,3 @@
-//
-// Created by ben on 2021-07-11.
-//
-
 #ifndef CPP_FALLING_SAND_VERTEX_BUFFER_HPP
 #define CPP_FALLING_SAND_VERTEX_BUFFER_HPP
 
@@ -11,48 +7,39 @@
 #include <GL/glew.h>
 #include <cassert>
 
+// Wrapper call for opengl vertex buffers
 class vertex_buffer {
 public:
-    explicit vertex_buffer(int size, const void* data, GLenum usage=GL_STATIC_DRAW) {
-        glGenBuffers(1, &obj_);
-        assert(obj_ != 0);
-        bind();
-        glBufferData(GL_ARRAY_BUFFER, size, data, usage);
-    }
+  // Create a vertex buffer of the given size using the given data
+  // data must point to a region of memory of at least size bytes
+  explicit vertex_buffer(int size, const void *data, GLenum usage = GL_STATIC_DRAW);
 
-    vertex_buffer(const vertex_buffer &) = delete;
+  // Not copyable
+  vertex_buffer(const vertex_buffer &) = delete;
 
-    vertex_buffer &operator=(const vertex_buffer &) = delete;
+  vertex_buffer &operator=(const vertex_buffer &) = delete;
 
-    vertex_buffer(vertex_buffer &&other) noexcept : obj_(other.obj_){
-        other.obj_ = 0;
-    }
+  // Move by swapping object ids
+  vertex_buffer(vertex_buffer &&other) noexcept: obj_(other.obj_) { other.obj_ = 0; }
 
-    vertex_buffer &operator=(vertex_buffer &&other) noexcept {
-        if (this != &other){
-            release();
-            std::swap(obj_, other.obj_);
-        }
-        return *this;
-    }
+  vertex_buffer &operator=(vertex_buffer &&other) noexcept;
 
-    ~vertex_buffer() { release(); }
+  // Destroy the vertex buffer on destruction
+  ~vertex_buffer() { release(); }
 
-    void bind() const{
-        glBindBuffer(GL_ARRAY_BUFFER, obj_);
-    }
+  // Binds the vertex buffer
+  void bind() const { glBindBuffer(GL_ARRAY_BUFFER, obj_); }
 
-    void unbind() const{
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
+  // Unbinds the vertex buffer
+  void unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
 private:
-    GLuint obj_{0};
+  GLuint obj_{0};
 
-    void release() {
-        glDeleteBuffers(1, &obj_);
-        obj_ = 0;
-    }
+  void release() {
+    glDeleteBuffers(1, &obj_);
+    obj_ = 0;
+  }
 };
 
 #endif //CPP_FALLING_SAND_VERTEX_BUFFER_HPP

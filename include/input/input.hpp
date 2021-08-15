@@ -8,16 +8,15 @@
 #include <application.hpp>
 #include <GLFW/glfw3.h>
 
-class input {
-public:
+namespace input {
+  // Wrapper for glfwGetMouseButton
   int static get_mouse_button(int button) {
-    return glfwGetMouseButton(
-        application::instance()->get_window()->get_native(), button);
+    return glfwGetMouseButton(application::instance()->get_window().glfw_win(), button);
   }
 
-  void static get_cursor(double *xPos, double *yPos) {
-    glfwGetCursorPos(application::instance()->get_window()->get_native(), xPos,
-                     yPos);
+  // Wrapper for glfwGetCursorPos
+  void static get_cursor_pos(double *xPos, double *yPos) {
+    glfwGetCursorPos(application::instance()->get_window().glfw_win(), xPos, yPos);
   }
 };
 

@@ -9,6 +9,7 @@
 
 using element_id_type = std::uint8_t;
 
+// struct that holds the required data for each particle
 struct particle_instance {
   element_id_type id{0};
   std::uint16_t age{0};
@@ -17,14 +18,8 @@ struct particle_instance {
   std::uint8_t r{};
   std::uint8_t g{};
   std::uint8_t b{};
-  std::uint8_t lastUpdated{255};
-  bool is_static{false};
+  bool lastUpdated{};
 
-  void set_color(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_) {
-    r = r_;
-    g = g_;
-    b = b_;
-  }
 };
 
 

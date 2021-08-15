@@ -1,8 +1,5 @@
 #include <simulation/element.hpp>
-#include <simulation/element_update.hpp>
 #include <simulation/rn_generator.hpp>
-#include <utility>
-
 
 particle_instance element::create() const {
   auto p = particle_instance{type, 0, 0, 0, red, green, blue};

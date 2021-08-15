@@ -3,39 +3,30 @@
 #include <simulation/rn_generator.hpp>
 #include <fstream>
 
-simulation_canvas::simulation_canvas(int width, int height)
+simulation_canvas::simulation_canvas(int width, int height, element_manager em)
     : buffer((width + 2) * (height + 2), {0, 0, 0, 0}),
       width_(width + 2),
       height_(height + 2),
-      boundaryId_(element_manager::instance().get_idx("boundary")) {
-  // Fill the outside layer with special element to avoid boundary checks
-  for (int x = 0; x < width_; ++x) {
-    get_particle(x, 0).id = boundaryId_;
-    get_particle(x, height_ - 1).id = boundaryId_;
-  }
-
-  for (int y = 0; y < height_; ++y) {
-    get_particle(0, y).id = boundaryId_;
-    get_particle(width_ - 1, y).id = boundaryId_;
-  }
+      elementManager_(std::move(em)) {
+  fill_boundary();
 }
 
 void simulation_canvas::step_forward() {
   evenFrame = !evenFrame;
 
-  for (int y = 1; y < height_ - 1; ++y) {
-    for (int x = 1; x < width_ - 1; ++x) {
+  for (int y = 0; y < height(); ++y) {
+    for (int x = 0; x < width(); ++x) {
       auto &p = get_particle(x, y);
-      assert(p.id < em.size());
+      assert(p.id < elementManager_.size());
       if (!p.id || p.lastUpdated == evenFrame) { continue; }
-      auto &e = em.get_element(p.id);
+      auto &e = elementManager_.get_element(p.id);
 
       p.lastUpdated = evenFrame;
 
-      auto &lifetime = em.get_lifetime_rule(p.id);
+      auto &lifetime = elementManager_.get_lifetime_rule(p.id);
       if (lifetime.transition_prob > 0 && lifetime.min_lifetime < p.age) {
         if (rn_gen.random_chance(lifetime.transition_prob)) {
-          p = em.get_element(lifetime.new_element).create();
+          p = elementManager_.get_element(lifetime.new_element).create();
           continue;
         }
       }
@@ -49,9 +40,9 @@ void simulation_canvas::step_forward() {
 
       for (auto &offset:neighbors_offsets) {
         auto &neighbor = get_particle(x + offset.first, y + offset.second);
-        auto &rule = em.get_contact_rule(p.id, neighbor.id);
+        auto &rule = elementManager_.get_contact_rule(p.id, neighbor.id);
         if (rn_gen.random_chance(rule.transform_chance)) {
-          neighbor = em.get_element(rule.transform_element).create();
+          neighbor = elementManager_.get_element(rule.transform_element).create();
         }
       }
 
@@ -75,7 +66,7 @@ void simulation_canvas::step_forward() {
       bool finished =
           for_each_in_line(x, y, p.vx, p.vy, [&lastValid, this, i](int x, int y) {
             auto &p1 = get_particle(x, y);
-            if (!em.get_displacement_rule(i, p1.id)) { return true; }
+            if (!elementManager_.get_displacement_rule(i, p1.id)) { return true; }
             lastValid = &p1;
             return false;
           });
@@ -88,36 +79,28 @@ void simulation_canvas::step_forward() {
 
 void simulation_canvas::add_particle(int x, int y, element_id_type id,
                                      const simulation_canvas::brush &b) {
-  assert(in_canvas(x, y));
-  assert(id < element_manager::instance().size());
+  assert(in_bounds(x, y));
+  assert(id < elementManager_.size());
   b(*this, x, y, id);
 }
 
 
 void simulation_canvas::add_particle(int x, int y, element_id_type id) {
-  get_particle(x, y) = em.get_element(id).create();
+  get_particle(x, y) = elementManager_.get_element(id).create();
 }
 
 void simulation_canvas::clear() {
   std::fill(buffer.begin(), buffer.end(), particle_instance{});
-  for (int x = 0; x < width_; ++x) {
-    get_particle(x, 0).id = boundaryId_;
-    get_particle(x, height_ - 1).id = boundaryId_;
-  }
-
-  for (int y = 0; y < height_; ++y) {
-    get_particle(0, y).id = boundaryId_;
-    get_particle(width_ - 1, y).id = boundaryId_;
-  }
+  fill_boundary();
 }
 
-void simulation_canvas::write_to_img(image &img) {
+void simulation_canvas::write_to_image(image &img) {
   assert(img.height() == height());
   assert(img.width() == width());
 
-  auto img_it = img.img_ptr();
-  for (int y = 1; y < height_ - 1; ++y) {
-    for (int x = 1; x < width_ - 1; ++x) {
+  auto img_it = img.data();
+  for (int y = 0; y < height(); ++y) {
+    for (int x = 0; x < width(); ++x) {
       const auto &p = get_particle(x, y);
       img_it[0] = p.r;
       img_it[1] = p.g;
@@ -128,21 +111,19 @@ void simulation_canvas::write_to_img(image &img) {
 }
 
 particle_instance &simulation_canvas::get_particle(int x, int y) {
-  assert(in_canvas(x, y));
+  ++x;
+  ++y;
+  assert(in_bounds(x, y));
   return buffer[y * width_ + x];
 }
 
 const particle_instance &simulation_canvas::get_particle(int x, int y) const {
-  assert(in_canvas(x, y));
+  assert(in_bounds(x, y));
   return buffer.at(y * width_ + x);
 }
 
-bool simulation_canvas::in_canvas(int x, int y) const {
+bool simulation_canvas::in_bounds(int x, int y) const {
   return x < width_ && y < height_ && y >= 0 && x >= 0;
-}
-
-bool simulation_canvas::on_floor(int y) const {
-  return y == height_ - 2;
 }
 
 bool
@@ -158,11 +139,11 @@ simulation_canvas::move_powder(int x, int y, particle_instance &p,
 
   auto dir = dirs[rand_offset];
   auto &neighbour = get_particle(x + dir, y + 1);
-  if (em.get_displacement_rule(p.id, neighbour.id)) {
+  if (elementManager_.get_displacement_rule(p.id, neighbour.id)) {
     swap_particles(p, neighbour);
     return true;
   }
-  if (em.get_displacement_rule(p.id, below.id)) {
+  if (elementManager_.get_displacement_rule(p.id, below.id)) {
     swap_particles(p, below);
     return true;
   }
@@ -172,7 +153,7 @@ simulation_canvas::move_powder(int x, int y, particle_instance &p,
 void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const element &e) {
   // todo: improve liquid movement rules
   auto &below = get_particle(x, y + 1);
-  if (em.get_displacement_rule(p.id, below.id)) {
+  if (elementManager_.get_displacement_rule(p.id, below.id)) {
     p.vy += gravity_accel;
     p.vx = 0;
     return;
@@ -182,10 +163,10 @@ void simulation_canvas::move_liquid(int x, int y, particle_instance &p, const el
   auto &neighbour1 = get_particle(x + dir, y + 1);
   auto &neighbour2 = get_particle(x - dir, y + 1);
 
-  if (em.get_displacement_rule(p.id, neighbour1.id)) {
+  if (elementManager_.get_displacement_rule(p.id, neighbour1.id)) {
     swap_particles(p, neighbour1);
     return;
-  } else if (em.get_displacement_rule(p.id, neighbour2.id)) {
+  } else if (elementManager_.get_displacement_rule(p.id, neighbour2.id)) {
     swap_particles(p, neighbour2);
     return;
   }
@@ -214,8 +195,8 @@ bool simulation_canvas::save(const std::filesystem::path &path) const {
 
   f << width() << " " << height() << std::endl;
 
-  for (int y = 1; y <= height(); ++y) {
-    for (int x = 1; x <= width(); ++x) {
+  for (int y = 0; y < height(); ++y) {
+    for (int x = 0; x < width(); ++x) {
       const auto &p = get_particle(x, y);
       f << (unsigned int) p.id;
       if (x < width()) { f << ","; }
@@ -243,7 +224,7 @@ bool simulation_canvas::load(const std::filesystem::path &path) {
   while (f.good()) {
     std::getline(f, line);
     std::stringstream s{line};
-    auto max_id = em.size();
+    auto max_id = elementManager_.size();
 
 
     while (std::getline(s, id_str, ',')) {
@@ -262,12 +243,12 @@ bool simulation_canvas::load(const std::filesystem::path &path) {
 
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
-      auto &p = get_particle(x + 1, y + 1);
+      auto &p = get_particle(x, y);
       auto i = ids[y * width + x];
-      if (i >= em.size()) {
+      if (i >= elementManager_.size()) {
         return false;
       }
-      p = em.get_element(i).create();
+      p = elementManager_.get_element(i).create();
     }
   }
 
@@ -304,4 +285,20 @@ std::string simulation_canvas::create_save_file_name(int save_idx) const {
                 save_idx,
                 save_file_ext_.c_str());
   return std::string{buf.get(), buf.get() + size_s - 1};
+}
+
+bool simulation_canvas::in_canvas(int x, int y) const {
+  return x < width() && y < height() && y >= 0 && x >= 0;
+}
+
+void simulation_canvas::fill_boundary() {
+  for (int x = -1; x <= width(); ++x) {
+    get_particle(x, -1).id = elementManager_.boundary_id();
+    get_particle(x, height()).id = elementManager_.boundary_id();
+  }
+
+  for (int y = -1; y <= height(); ++y) {
+    get_particle(-1, y).id = elementManager_.boundary_id();
+    get_particle(width(), y).id = elementManager_.boundary_id();
+  }
 }
