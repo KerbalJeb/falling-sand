@@ -29,10 +29,6 @@ public:
         width_(width),
         height_(height) {
 
-    if (!glewInit()) {
-      std::exit(EXIT_FAILURE);
-    }
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -40,13 +36,21 @@ public:
     glfwWindowHint(GLFW_RESIZABLE, resizable);
     window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 
-    if (!window_) {
+    if (window_ == nullptr) {
+      glfwTerminate();
+      std::cout << "Failed to create window" << std::endl;
       std::exit(EXIT_FAILURE);
     }
 
     glfwSetWindowUserPointer(window_, &data_);
     glfwMakeContextCurrent(window_);
     glewExperimental = GL_TRUE;
+
+    if (glewInit() != GLEW_OK) {
+      glfwTerminate();
+      std::cout << "glewInit failed" << std::endl;
+      std::exit(EXIT_FAILURE);
+    }
 
     set_handler(handler);
 
