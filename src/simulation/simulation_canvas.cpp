@@ -159,12 +159,14 @@ void simulation_canvas::move_liquid(int x, int y) {
   auto &below = get_particle(x, y + 1);
   auto &p = get_particle(x, y);
   auto &e = elementManager_.get_element(p.id);
+  // Fall down
   if (elementManager_.get_displacement_rule(p.id, below.id)) {
     p.vy += gravity_accel;
     p.vx = 0;
     return;
   }
 
+  // Move down and to the left or right
   auto dir = 2 * static_cast<int>(rn_gen.random_int(1)) - 1;
   auto &neighbour1 = get_particle(x + dir, y + 1);
   auto &neighbour2 = get_particle(x - dir, y + 1);
@@ -177,6 +179,7 @@ void simulation_canvas::move_liquid(int x, int y) {
     return;
   }
 
+  // Spread out
   int spread = e.opt_param;
 
   int xMin = x, xMax = x;
@@ -198,6 +201,14 @@ void simulation_canvas::move_liquid(int x, int y) {
     auto &pNext = get_particle(offset, y);
     if (elementManager_.get_displacement_rule(p.id, pNext.id)) {
       swap_particles(p, pNext);
+      x = xNew;
+      // Check if we can fall down
+      for (int yNew = y + 1; yNew < y + gravity_accel; ++yNew) {
+        auto &pBelow = get_particle(x, yNew);
+        if (elementManager_.get_displacement_rule(pNext.id, pBelow.id)) {
+          swap_particles(pNext, pBelow);
+        }
+      }
       break;
     }
   }

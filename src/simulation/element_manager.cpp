@@ -2,7 +2,9 @@
 #include <cassert>
 
 element_manager::element_manager(const std::initializer_list<element_initializer> &elements) :
-    contactRules_(elements.size() * elements.size()), lifetimeRules_(elements.size()) {
+    contactRules_(elements.size() * elements.size()),
+    lifetimeRules_(elements.size()),
+    displacementRules_(elements.size() * elements.size(), false) {
 
   allElements_.reserve(elements.size());
   element_id_type idx = 0;
@@ -41,26 +43,25 @@ element_manager::element_manager(const std::initializer_list<element_initializer
 
   std::size_t n = allElements_.size();
   for (int i = 0; i < n; ++i) {
-    displacementRules_.emplace_back(size(), false);
     for (int j = 0; j < n; ++j) {
       auto &e1 = get_element(i);
       auto &e2 = get_element(j);
       if (e2.type == 0) {
-        displacementRules_[i][j] = true;
+        displacementRules_[i * size() + j] = true;
       }
       if (e1.movement == movement_type::powder &&
           (e2.movement == movement_type::liquid || e2.movement == movement_type::gas)) {
-        displacementRules_[i][j] = true;
+        displacementRules_[i * size() + j] = true;
       }
       if (e1.movement == movement_type::liquid && e2.movement == movement_type::gas) {
-        displacementRules_[i][j] = true;
+        displacementRules_[i * size() + j] = true;
+      }
+      if (e1.movement == movement_type::liquid && e2.movement == movement_type::liquid) {
+        // Less viscous fluids are taken to be less dense
+        displacementRules_[i * size() + j] = e1.opt_param < e2.opt_param;
       }
     }
   }
-
-  // Just hard coding this for now, could add a density property later
-  auto water_id = find_id("water"), oil_id = find_id("oil");
-  displacementRules_[water_id][oil_id] = true;
 }
 
 std::size_t element_manager::find_id(const std::string &name) const {

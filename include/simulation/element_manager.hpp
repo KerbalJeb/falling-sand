@@ -1,7 +1,3 @@
-//
-// Created by ben on 2021-07-20.
-//
-
 #ifndef CPP_FALLING_SAND_ELEMENT_MANAGER_HPP
 #define CPP_FALLING_SAND_ELEMENT_MANAGER_HPP
 
@@ -26,6 +22,7 @@ public:
   // Creates an element manager with the given elements
   // First entry must be the empty element
   // The list must also contain one solid element with the name 'boundary'
+  // This element is used to create an invisible boarders around the simulation area
   element_manager(const std::initializer_list<element_initializer> &elements);
 
   element_manager(const element_manager &) = delete;
@@ -50,7 +47,7 @@ public:
   // Check if primary can displays secondary
   [[nodiscard]] bool
   get_displacement_rule(element_id_type primary,
-                        element_id_type secondary) const { return displacementRules_[primary][secondary]; }
+                        element_id_type secondary) const { return displacementRules_[primary * size() + secondary]; }
 
   // Get the life time rule for p
   [[nodiscard]] const lifetime_rule &
@@ -64,7 +61,7 @@ public:
 
 private:
   std::vector<element> allElements_;
-  std::vector<std::vector<bool>> displacementRules_;
+  std::vector<bool> displacementRules_;
   std::vector<contact_rule> contactRules_;
   std::vector<lifetime_rule> lifetimeRules_;
   element_id_type boarderId_;

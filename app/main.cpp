@@ -43,6 +43,7 @@ int main() {
       {ROOT_DIR"/resources/oil-button.png",   435, 650, 25, 75, gen_button_action("oil")},
       {ROOT_DIR"/resources/wall-button.png",  520, 650, 25, 75, gen_button_action("wall")},
       {ROOT_DIR"/resources/steam-button.png", 605, 650, 25, 75, gen_button_action("steam")},
+      {ROOT_DIR"/resources/salt-button.png",  690, 650, 25, 75, gen_button_action("salt")},
   };
 
   ui_layer uiLayer{application::basic_render(), buttons};

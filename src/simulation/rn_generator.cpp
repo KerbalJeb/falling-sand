@@ -9,7 +9,7 @@ bool rng::random_chance(float p) {
   // Save a bit of work and return false if p is zero
   if (p == 0) { return false; }
   // Precomputed values won't work well for small probabilities
-  if (p < 0.05) { return real_(rd_) < p; }
+  if (p < 5.0f / numValues_) { return real_(rd_) < p; }
   // Use the precomputed values to speed things up a bit
   ++idx_;
   idx_ %= numValues_;

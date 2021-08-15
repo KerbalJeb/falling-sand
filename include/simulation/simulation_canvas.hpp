@@ -84,6 +84,7 @@ private:
 
   [[nodiscard]] bool in_bounds(int x, int y) const;
 
+  // Generates the 1px boundary around the simulation area used for boundary checking
   void fill_boundary();
 
   bool move_powder(int x, int y, particle_instance &p, const element &e);

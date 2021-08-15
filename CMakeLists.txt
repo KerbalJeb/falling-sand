@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.18)
 project(cpp_falling_sand)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_VERBOSE_MAKEFILE ON)
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -11,7 +10,9 @@ find_package(glm)
 find_package(Catch2 REQUIRED)
 
 include(FetchContent)
+# CMake doesn't seem to be able to find GLM on the lab computes
 if (NOT glm_FOUND)
+    message(STATUS "Downloading GLM headers")
     FetchContent_Declare(glm
             GIT_REPOSITORY https://github.com/g-truc/glm.git
             GIT_TAG "0.9.9.8"
