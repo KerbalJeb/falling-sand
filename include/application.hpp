@@ -22,6 +22,11 @@ public:
     if (!glfwInit()) {
       std::exit(EXIT_FAILURE);
     }
+
+    glfwSetErrorCallback([](int id, auto description) {
+      std::cout << "Error(" << id << "): " << description << std::endl;
+    });
+
     if (instance_ == nullptr) {
       instance_ = new application(vertex_path, fragment_path, args...);
     }
