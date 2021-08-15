@@ -125,22 +125,23 @@ private:
   bool on_mouse_event(int x, int y) {
     int xcord = x / scale_;
     int ycord = y / scale_;
+    bool status = false;
     if (canvas_.in_canvas(xcord, ycord)) {
       if (input::get_mouse_button(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         activeBrush_->set_overwrite(false);
         canvas_.add_particle(xcord, ycord, activeId_, *activeBrush_);
-        return true;
+        status = true;
       }
       if (input::get_mouse_button(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         activeBrush_->set_overwrite(true);
         canvas_.add_particle(xcord, ycord, 0, *activeBrush_);
-        return true;
+        status = true;
       }
       w_.use_custom_cursor();
     } else {
       w_.use_standard_cursor();
     }
-    return false;
+    return status;
   }
 
   bool on_key(key_down_event &e) {
