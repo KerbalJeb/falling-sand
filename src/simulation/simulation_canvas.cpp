@@ -222,14 +222,21 @@ bool simulation_canvas::save(const std::filesystem::path &path) const {
 
   f << width() << " " << height() << std::endl;
 
+  int activeId = get_particle(0, 0).id;
+  int count = 0;
+
   for (int y = 0; y < height(); ++y) {
     for (int x = 0; x < width(); ++x) {
       const auto &p = get_particle(x, y);
-      f << (unsigned int) p.id;
-      if (x < width()) { f << ","; }
+      if (p.id != activeId) {
+        f << count << ":" << (unsigned int) activeId << ",";
+        count = 0;
+      }
+      activeId = p.id;
+      ++count;
     }
-    f << std::endl;
   }
+  f << count << ":" << (unsigned int) activeId << std::endl;
   f.close();
   return true;
 }
@@ -245,24 +252,35 @@ bool simulation_canvas::load(const std::filesystem::path &path) {
 
   std::vector<element_id_type> ids;
   std::string line;
-  std::string id_str;
+  std::string token_str;
 
   ids.reserve(width * height);
-  while (f.good()) {
-    std::getline(f, line);
+  auto max_id = elementManager_.size();
+  while (f >> line) {
     std::stringstream s{line};
-    auto max_id = elementManager_.size();
 
+    while (std::getline(s, token_str, ',')) {
+      std::stringstream token_stream{token_str};
+      std::string count_str;
+      std::string id_str;
+      bool failed = false;
+      failed |= !(bool) std::getline(token_stream, count_str, ':');
+      failed |= !(bool) std::getline(token_stream, id_str, ':');
 
-    while (std::getline(s, id_str, ',')) {
-      char *end;
+      if (failed) { return false; }
+
+      char *end1;
+      char *end2;
       errno = 0;
-      auto int_id = std::strtol(id_str.c_str(), &end, 10);
+      auto count = std::strtol(count_str.c_str(), &end1, 10);
+      auto int_id = std::strtol(id_str.c_str(), &end2, 10);
 
-      if (*end != '\0' || int_id >= max_id || errno != 0) {
+      if (*end2 != '\0' || *end1 != '\0' || int_id >= max_id || errno != 0) {
         return false;
       }
-      ids.push_back(int_id);
+      for (int i = 0; i < count; ++i) {
+        ids.push_back(int_id);
+      }
     }
   }
 
