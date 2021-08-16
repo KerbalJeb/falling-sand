@@ -50,3 +50,4 @@ install(TARGETS cpp_falling_sand DESTINATION bin)
 
 install(PROGRAMS demo DESTINATION bin)
 install(DIRECTORY resources DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY example_saves DESTINATION ${CMAKE_INSTALL_PREFIX})
