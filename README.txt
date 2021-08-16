@@ -12,6 +12,10 @@ Build/Installation notes:
 
     - Running the demo bash script should result in a GUI window titled 'Falling Sand' appearing.
 
+Software use
+    Select Elements to place using the buttons located at the bottom of the screen. 
+    Left click and drag in the upper black portion of the screen to place an element.
+
 User controls
     Left Mouse Button        : Place currently selected element on screen
     Right Mouse Button       : Delete elements at the cursors current position
