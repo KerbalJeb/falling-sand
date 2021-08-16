@@ -38,12 +38,13 @@ public:
                                                                                                   {"lava",      "sand",  0.05},
                                                                                                   {"salt",      "slt-water", 0.05},
                                                                                               },  5},
-            {"slt-water", movement_type::liquid, 50,  50,  150, 0.2,  {0,   0,   {}},         {
-                                                                                                  {"fire",  "empty_id", 0.75},
-                                                                                                  {"lava",      "sand",  0.05},
-                                                                                                  {"salt",      "slt-water", 0.01},
-                                                                                                  {"water", "slt-water", 0.002},
-                                                                                              },  4},
+            {"slt-water", movement_type::liquid, 50,  50,  150, 0.2,  {0,   0,   {}}, {
+                                                                                          {"fire", "empty_id", 0.75},
+                                                                                          {"lava", "sand", 0.05},
+                                                                                          {"salt", "slt-water", 0.01},
+                                                                                          {"water", "slt-water", 0.002},
+                                                                                          {"wood", "empty_id", 0.002},
+                                                                                      },  4},
 
             {"wood",      movement_type::solid,  120, 70,  30,  0.1,  {0,   0,   {}},         {
                                                                                                   {"water", "wood",     0.01},

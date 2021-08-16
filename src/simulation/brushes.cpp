@@ -6,7 +6,9 @@ void rectangle_brush::operator()(simulation_canvas &canvas, int x, int y,
   auto &em = canvas.get_element_manager();
   if (size_ == 0) {
     auto &e = canvas.get_particle(x, y);
-    e = em.get_element(id).create();
+    if (overwrite_ || e.id == 0 && e.id != id) {
+      e = em.get_element(id).create();
+    }
     return;
   }
   auto xMin = std::clamp(x - size_, 1, canvas.width());
