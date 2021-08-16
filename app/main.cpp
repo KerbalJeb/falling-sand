@@ -48,7 +48,6 @@ int main() {
 
   ui_layer uiLayer{application::basic_render(), buttons};
 
-  // UI layer is on top so it get priority on input events
   app->push_layer(&uiLayer);
   app->push_layer(&sandLayer);
 
