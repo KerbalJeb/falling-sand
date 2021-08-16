@@ -5,7 +5,7 @@ Build/Installation notes:
         This may make the generation stage take slightly longer than usual
     - The software will run significantly faster when build as a release
         and may lag with a large number of particles in debug
-    - After installation, there should be a bin, resources and example_saves folder in the installation director
+    - After installation, there should be a bin, resources and example_saves folder in the installation directory
         The bin folder with contain the executable and bash script
         The resources folder contains images and shader code files
         The example_saves folder contains some example save files that demonstrate many of the simulation rules
